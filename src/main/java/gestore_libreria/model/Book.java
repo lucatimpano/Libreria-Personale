@@ -54,6 +54,19 @@ public class Book {
         return coverPath;
     }
 
+    @Override
+    public String toString() {
+        return "Book{" +
+                "title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", isbn='" + isbn + '\'' +
+                ", genre='" + genre + '\'' +
+                ", rating=" + rating +
+                ", readingState='" + readingState + '\'' +
+                ", coverPath='" + coverPath + '\'' +
+                '}';
+    }
+
     //builder per la costruzione dell'oggetto libro
     public static class Builder{
         //obbligatori

@@ -8,7 +8,7 @@ public abstract class BookManager {
 
     //classe che definisce l'astrazione del database, il client interagirà con la seguente classe
 
-    private final BookRepositoryImplementor repository;
+    protected final BookRepositoryImplementor repository;
 
     public BookManager(BookRepositoryImplementor repository){
         this.repository = repository;
@@ -18,8 +18,8 @@ public abstract class BookManager {
         repository.save(book);
     }
 
-    public void getAllBook(){
-        repository.loadAll();
+    public List<Book> getAllBook(){
+        return repository.loadAll();
     }
 
     public List<Book> findBookByTitle(String title){
