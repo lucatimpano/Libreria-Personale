@@ -3,6 +3,7 @@ package gestore_libreria.db;
 import gestore_libreria.model.Book;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 //classe che implementa il database
@@ -54,7 +55,28 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 
     @Override
     public List<Book> loadAll() {
-        return List.of();
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books";
+
+        try{
+            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+
+            while (resultSet.next()){
+                Book book = new Book.Builder(resultSet.getString("title"), resultSet.getString("author"))
+                        .isbn(resultSet.getString("isbn"))
+                        .genre(resultSet.getString("genre"))
+                        .rating(resultSet.getInt("rating"))
+                        .readingState(resultSet.getString("readingState"))
+                        .readingState(resultSet.getString("CoverPath"))
+                        .build();
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return books;
     }
 
     @Override
