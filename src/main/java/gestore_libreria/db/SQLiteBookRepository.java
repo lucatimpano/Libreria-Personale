@@ -16,7 +16,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
             String createTable = """
                     CREATE TABLE IF NOT EXISTS books(
                         title TEXT NOT NULL,
-                        authot TEXT NOT NULL,
+                        author TEXT NOT NULL,
                         isbn TEXT,
                         genre TEXT,
                         rating INTEGER,
