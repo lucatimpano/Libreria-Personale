@@ -3,6 +3,7 @@ package gestore_libreria.ui;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.List;
 
 import com.formdev.flatlaf.themes.*;
 import gestore_libreria.db.BookManager;
@@ -36,8 +37,67 @@ public class GestoreLibreriaUI extends JFrame{
         //sezione sx
         JPanel leftPanel = inizializzaSezioneSX();
 
-        mainPanel.add(leftPanel, BorderLayout.WEST);
+        JPanel rightPanel = inizializzaSezioneDX();
 
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+        mainPanel.add(rightPanel, BorderLayout.CENTER);
+
+    }
+
+    private JPanel inizializzaSezioneDX(){
+        JPanel rightPanel = new JPanel(new BorderLayout());
+
+        // Barra di ricerca con FlatLaf arrotondata
+        JTextField searchField = new JTextField("Search");
+        searchField.putClientProperty("JTextField.roundRect", true);
+        searchField.setBackground(new Color(53, 53, 53));
+        searchField.setForeground(Color.WHITE);
+        searchField.setCaretColor(Color.WHITE);
+        searchField.setPreferredSize(new Dimension(150, 30));
+        searchField.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        rightPanel.add(searchField, BorderLayout.NORTH);
+
+        // Lista dei libri dal database
+        JPanel bookListPanel = new JPanel();
+        bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
+
+        getAllBook(bookListPanel,rightPanel);
+
+        return rightPanel;
+    }
+
+    private void getAllBook(JPanel bookListPanel, JPanel rightPanel){
+
+        List<Book> books = db.getAllBook();
+        for (Book b : books) {
+            JPanel bookPanel = new JPanel(new BorderLayout());
+            bookPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
+
+            // Copertina
+            JLabel coverLabel = new JLabel();
+            coverLabel.setPreferredSize(new Dimension(60, 90));
+            coverLabel.setOpaque(true);
+            coverLabel.setBackground(Color.LIGHT_GRAY);
+            // carica immagine se presente
+            if (!b.getCoverPath().isBlank()) {
+                ImageIcon icon = new ImageIcon(b.getCoverPath());
+                Image img = icon.getImage().getScaledInstance(60, 90, Image.SCALE_SMOOTH);
+                coverLabel.setIcon(new ImageIcon(img));
+                coverLabel.setBackground(null);
+            }
+            bookPanel.add(coverLabel, BorderLayout.WEST);
+
+            // Info titolo e autore
+            JLabel infoLabel = new JLabel(b.getTitle() + " - " + b.getAuthor());
+            infoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            bookPanel.add(infoLabel, BorderLayout.CENTER);
+
+            bookListPanel.add(bookPanel);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(bookListPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        rightPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     private JPanel inizializzaSezioneSX(){
@@ -179,7 +239,10 @@ public class GestoreLibreriaUI extends JFrame{
                 String genre = genreField.getText().trim();
                 int rating = (Integer) ratingSpinner.getValue();
                 String stato = (String) statoCombo.getSelectedItem();
-                String path = imagePathField.getText().trim();
+                String path = "src/main/resources/images/image_placeholder.png";
+                if(!imagePathField.getText().trim().isEmpty()){
+                    path = imagePathField.getText().trim();
+                }
 
                 if (!titolo.isEmpty() && !autore.isEmpty()) {
                     Book nuovoLibro = new Book.Builder(titolo, autore).isbn(isbn)
