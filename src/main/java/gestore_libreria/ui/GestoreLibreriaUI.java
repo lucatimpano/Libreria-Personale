@@ -2,17 +2,14 @@ package gestore_libreria.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.io.File;
 
-import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.themes.*;
 import gestore_libreria.db.BookManager;
 import gestore_libreria.db.BookRepositoryImplementor;
 import gestore_libreria.db.ConcreteBookManager;
 import gestore_libreria.db.SQLiteBookRepository;
 import gestore_libreria.model.Book;
-
-import javax.swing.*;
 
 public class GestoreLibreriaUI extends JFrame{
 
@@ -117,19 +114,24 @@ public class GestoreLibreriaUI extends JFrame{
             imagePathField.setEditable(false);
             JButton browseBtn = new JButton("Sfoglia");
 
-            browseBtn.addActionListener(ev -> {
-                JFileChooser fileChooser = new JFileChooser();
-                int result = fileChooser.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    imagePathField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-                }
-            });
+            //Immagine di copertina
+            JLabel imagePreview = new JLabel();
+            int width = 120;
+            int height = 180;
+            imagePreview.setPreferredSize(new Dimension(width, height));
+            imagePreview.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+            ImageIcon placeholder = new ImageIcon("src/main/resources/images/image_placeholder.png");
+            imagePreview.setIcon(new ImageIcon(placeholder.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+
+            //comportamento tasto sfoglia
+            browseButtonAction(browseBtn, imagePathField, imagePreview, width, height);
 
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            panel.add(new JLabel("Titolo:"));
+            panel.add(new JLabel("Titolo*:"));
             panel.add(titoloField);
-            panel.add(new JLabel("Autore:"));
+            panel.add(new JLabel("Autore*:"));
             panel.add(autoreField);
             panel.add(new JLabel("Genere:"));
             panel.add(genreField);
@@ -145,7 +147,12 @@ public class GestoreLibreriaUI extends JFrame{
             filePanel.add(browseBtn);
             panel.add(filePanel);
 
-            int result = JOptionPane.showConfirmDialog(null, panel, "Nuovo libro", JOptionPane.OK_CANCEL_OPTION);
+            // Layout generale
+            JPanel BookPanel = new JPanel(new BorderLayout());
+            BookPanel.add(panel, BorderLayout.CENTER);
+            BookPanel.add(imagePreview, BorderLayout.WEST);
+
+            int result = JOptionPane.showConfirmDialog(null, BookPanel, "Nuovo libro", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result == JOptionPane.OK_OPTION) {
                 String titolo = titoloField.getText().trim();
                 String autore = autoreField.getText().trim();
@@ -171,6 +178,36 @@ public class GestoreLibreriaUI extends JFrame{
         });
         return addBookBtn;
     }
+
+    private void browseButtonAction(JButton browseBtn, JTextField imagePathField, JLabel imagePreview, int width, int height){
+        browseBtn.addActionListener(ev -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                imagePathField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+
+                ImageIcon selectedIcon = loadAndScaleImage(selectedFile.getAbsolutePath(), width, height);
+                if (selectedIcon != null) {
+                    imagePreview.setIcon(selectedIcon); // sostituisce il placeholder
+                } else {
+                    JOptionPane.showMessageDialog(null, "Impossibile caricare l'immagine.");
+                }
+            }
+        });
+    }
+
+    private ImageIcon loadAndScaleImage(String path, int width, int height) {
+        try {
+            ImageIcon icon = new ImageIcon(path);
+            Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        } catch (Exception e) {
+            System.err.println("Errore nel caricamento immagine: " + e.getMessage());
+            return null;
+        }
+    }
+
 
     public static void main(String[] args) {
         try{
