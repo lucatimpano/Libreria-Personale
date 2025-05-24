@@ -70,7 +70,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
                         .genre(resultSet.getString("genre"))
                         .rating(resultSet.getInt("rating"))
                         .readingState(resultSet.getString("readingState"))
-                        .readingState(resultSet.getString("CoverPath"))
+                        .coverPath(resultSet.getString("CoverPath"))
                         .build();
                 books.add(book);
             }
@@ -99,8 +99,8 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 
     public static void main(String[] args) {
         SQLiteBookRepository repo = new SQLiteBookRepository();
-//        Book book = new Book.Builder("Prova", "Libro").isbn("12ab32sda1").build();
-//        repo.save(book);
+        Book book = new Book.Builder("Prova", "Libro").isbn("12ab32sda1").build();
+        repo.save(book);
     }
 
 }
