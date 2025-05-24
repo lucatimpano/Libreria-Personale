@@ -35,7 +35,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
     public void save(Book book) {
         //Per inserire il libro preparo la stringa sql con gli elementi da aggiungere seguiti da ? per ogni parametro
         String sql = """
-                INSERT INTO books (title, author, genre, isbn, rating, readingState, coverPath)
+                INSERT INTO books (title, author, isbn, genre, rating, readingState, coverPath)
                 VALUES (?,?,?,?,?,?,?)
                 """;
         try{
@@ -70,7 +70,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
                         .genre(resultSet.getString("genre"))
                         .rating(resultSet.getInt("rating"))
                         .readingState(resultSet.getString("readingState"))
-                        .coverPath(resultSet.getString("CoverPath"))
+                        .coverPath(resultSet.getString("coverPath"))
                         .build();
                 books.add(book);
             }
