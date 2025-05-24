@@ -41,6 +41,8 @@ public class GestoreLibreriaUI extends JFrame{
         leftPanel.setLayout(new BorderLayout());
         leftPanel.setPreferredSize(new Dimension(200, 0));
         leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        //prova
     }
 
 }
