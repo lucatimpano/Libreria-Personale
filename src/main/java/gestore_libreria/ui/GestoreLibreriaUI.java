@@ -16,11 +16,11 @@ import javax.swing.*;
 
 public class GestoreLibreriaUI extends JFrame{
 
-    BookRepositoryImplementor repo = new SQLiteBookRepository();
-    BookManager db = new ConcreteBookManager(repo);
+    BookManager db;
 
-    public GestoreLibreriaUI(){
+    public GestoreLibreriaUI(BookManager db){
         super("Gestore Libreria");
+        this.db = db;
         inizializzaUI();
     }
 
@@ -91,9 +91,85 @@ public class GestoreLibreriaUI extends JFrame{
         titlePanel.add(StatoBottoni, BorderLayout.CENTER);
 
         // Bottone addBook
+        JButton addBookBtn = addBookButton();
+        JPanel bottomLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomLeftPanel.add(addBookBtn);
+        leftPanel.add(titlePanel, BorderLayout.NORTH);
+        leftPanel.add(bottomLeftPanel, BorderLayout.SOUTH);
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+
+    }
+
+    private JButton addBookButton(){
         JButton addBookBtn = new JButton("Aggiungi libro");
         addBookBtn.setBackground(new Color(30, 144, 255)); // Blu
         addBookBtn.setForeground(Color.WHITE);
+
+        //logica per il pannello per aggiungere un libro
+        addBookBtn.addActionListener(e -> {
+            JTextField titoloField = new JTextField(20);
+            JTextField autoreField = new JTextField(20);
+            JTextField isbnField = new JTextField(20);
+            JTextField genreField = new JTextField(20);
+            JSpinner ratingSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 5, 1));
+            JComboBox<String> statoCombo = new JComboBox<>(new String[]{"letto", "in lettura", "da leggere"});
+            JTextField imagePathField = new JTextField(15);
+            imagePathField.setEditable(false);
+            JButton browseBtn = new JButton("Sfoglia");
+
+            browseBtn.addActionListener(ev -> {
+                JFileChooser fileChooser = new JFileChooser();
+                int result = fileChooser.showOpenDialog(null);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    imagePathField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+                }
+            });
+
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.add(new JLabel("Titolo:"));
+            panel.add(titoloField);
+            panel.add(new JLabel("Autore:"));
+            panel.add(autoreField);
+            panel.add(new JLabel("Genere:"));
+            panel.add(genreField);
+            panel.add(new JLabel("ISBN:"));
+            panel.add(isbnField);
+            panel.add(new JLabel("Rating (1-5):"));
+            panel.add(ratingSpinner);
+            panel.add(new JLabel("Stato lettura:"));
+            panel.add(statoCombo);
+            panel.add(new JLabel("Copertina:"));
+            JPanel filePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            filePanel.add(imagePathField);
+            filePanel.add(browseBtn);
+            panel.add(filePanel);
+
+            int result = JOptionPane.showConfirmDialog(null, panel, "Nuovo libro", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                String titolo = titoloField.getText().trim();
+                String autore = autoreField.getText().trim();
+                String isbn = isbnField.getText().trim();
+                String genre = genreField.getText().trim();
+                int rating = (Integer) ratingSpinner.getValue();
+                String stato = (String) statoCombo.getSelectedItem();
+                String path = imagePathField.getText().trim();
+
+                if (!titolo.isEmpty() && !autore.isEmpty()) {
+                    Book nuovoLibro = new Book.Builder(titolo, autore).isbn(isbn)
+                            .rating(rating)
+                            .readingState(stato)
+                            .coverPath(path)
+                            .genre(genre)
+                            .build();
+                    System.out.println("Creato libro: " + nuovoLibro.toString());
+                    db.addBook(nuovoLibro);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Titolo e autore sono obbligatori.");
+                }
+            }
+        });
+        return addBookBtn;
     }
 
     public static void main(String[] args) {
@@ -102,9 +178,10 @@ public class GestoreLibreriaUI extends JFrame{
         } catch (UnsupportedLookAndFeelException e) {
             System.err.println("Impossibile caricare FlatLaf");
         }
-
+        BookRepositoryImplementor repo = new SQLiteBookRepository();
+        BookManager db = new ConcreteBookManager(repo);
         SwingUtilities.invokeLater(() -> {
-            GestoreLibreriaUI UI = new GestoreLibreriaUI();
+            GestoreLibreriaUI UI = new GestoreLibreriaUI(db);
             UI.setVisible(true);
         });
     }

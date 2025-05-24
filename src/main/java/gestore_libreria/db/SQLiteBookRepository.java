@@ -49,8 +49,9 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
             preparedStatement.setString(6, book.getReadingState());
             preparedStatement.setString(7,book.getCoverPath());
             preparedStatement.executeUpdate();
+
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
