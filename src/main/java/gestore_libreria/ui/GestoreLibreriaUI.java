@@ -34,6 +34,13 @@ public class GestoreLibreriaUI extends JFrame{
         add(mainPanel);
 
         //sezione sx
+        JPanel leftPanel = inizializzaSezioneSX();
+
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+
+    }
+
+    private JPanel inizializzaSezioneSX(){
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BorderLayout());
         leftPanel.setPreferredSize(new Dimension(200, 0));
@@ -44,8 +51,7 @@ public class GestoreLibreriaUI extends JFrame{
         TextLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
         TextLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
 
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.add(TextLabel, BorderLayout.NORTH);
+
 
         // Proprietà dei bottoni
         JPanel StatoBottoni = new JPanel();
@@ -85,15 +91,20 @@ public class GestoreLibreriaUI extends JFrame{
             });
         }
 
+        //titolo applicazione
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.add(TextLabel, BorderLayout.NORTH);
         titlePanel.add(StatoBottoni, BorderLayout.CENTER);
 
-        // Bottone addBook
+        //Bottone addBook
         JButton addBookBtn = addBookButton();
+
         JPanel bottomLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bottomLeftPanel.add(addBookBtn);
         leftPanel.add(titlePanel, BorderLayout.NORTH);
         leftPanel.add(bottomLeftPanel, BorderLayout.SOUTH);
-        mainPanel.add(leftPanel, BorderLayout.WEST);
+
+        return leftPanel;
 
     }
 
@@ -119,10 +130,16 @@ public class GestoreLibreriaUI extends JFrame{
             int width = 120;
             int height = 180;
             imagePreview.setPreferredSize(new Dimension(width, height));
-            imagePreview.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
             ImageIcon placeholder = new ImageIcon("src/main/resources/images/image_placeholder.png");
             imagePreview.setIcon(new ImageIcon(placeholder.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+
+
+            JPanel imageWrapper = new JPanel();
+            imageWrapper.setLayout(new BorderLayout());
+            imageWrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+            imageWrapper.add(imagePreview, BorderLayout.CENTER);
+
 
             //comportamento tasto sfoglia
             browseButtonAction(browseBtn, imagePathField, imagePreview, width, height);
@@ -150,7 +167,9 @@ public class GestoreLibreriaUI extends JFrame{
             // Layout generale
             JPanel BookPanel = new JPanel(new BorderLayout());
             BookPanel.add(panel, BorderLayout.CENTER);
-            BookPanel.add(imagePreview, BorderLayout.WEST);
+            BookPanel.add(imageWrapper, BorderLayout.NORTH);
+            imageWrapper.setLayout(new FlowLayout(FlowLayout.CENTER));
+
 
             int result = JOptionPane.showConfirmDialog(null, BookPanel, "Nuovo libro", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (result == JOptionPane.OK_OPTION) {
