@@ -97,10 +97,10 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 
 
 
-    public static void main(String[] args) {
-        SQLiteBookRepository repo = new SQLiteBookRepository();
-        Book book = new Book.Builder("Prova", "Libro").isbn("12ab32sda1").build();
-        repo.save(book);
-    }
+//    public static void main(String[] args) {
+//        SQLiteBookRepository repo = new SQLiteBookRepository();
+//        Book book = new Book.Builder("Prova", "Libro").isbn("12ab32sda1").build();
+//        repo.save(book);
+//    }
 
 }
