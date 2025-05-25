@@ -2,6 +2,8 @@ package gestore_libreria.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 
@@ -11,12 +13,16 @@ import gestore_libreria.db.BookRepositoryImplementor;
 import gestore_libreria.db.ConcreteBookManager;
 import gestore_libreria.db.SQLiteBookRepository;
 import gestore_libreria.model.Book;
+import gestore_libreria.observer.BookObserver;
+import gestore_libreria.observer.ConcreteBookObserver;
 
 public class GestoreLibreriaUI extends JFrame{
 
-    BookManager db;
+    private ConcreteBookManager db;
+    private BookObserver bookObserver;
+    private BooksPanelUI booksPanelUI;
 
-    public GestoreLibreriaUI(BookManager db){
+    public GestoreLibreriaUI(ConcreteBookManager db){
         super("Gestore Libreria");
         this.db = db;
         inizializzaUI();
@@ -42,6 +48,23 @@ public class GestoreLibreriaUI extends JFrame{
         mainPanel.add(leftPanel, BorderLayout.WEST);
         mainPanel.add(rightPanel, BorderLayout.CENTER);
 
+        this.booksPanelUI = new BooksPanelUI();
+        rightPanel.add(booksPanelUI);
+
+        this.bookObserver = new ConcreteBookObserver(this.booksPanelUI,this.db);
+
+        setVisible(true);
+
+        // Discrivo l'observer nel caso in cui decidiamo di chiudere la finestra
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (bookObserver != null) {
+                    bookObserver.unsubscribe();
+                }
+            }
+        });
+
     }
 
     private JPanel inizializzaSezioneDX(){
@@ -58,10 +81,10 @@ public class GestoreLibreriaUI extends JFrame{
         rightPanel.add(searchField, BorderLayout.NORTH);
 
         // Lista dei libri dal database
-        JPanel bookListPanel = new JPanel();
-        bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
-
-        getAllBook(bookListPanel,rightPanel);
+//        JPanel bookListPanel = new JPanel();
+//        bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
+//
+//        getAllBook(bookListPanel,rightPanel);
 
         return rightPanel;
     }
@@ -94,10 +117,6 @@ public class GestoreLibreriaUI extends JFrame{
 
             bookListPanel.add(bookPanel);
         }
-
-        JScrollPane scrollPane = new JScrollPane(bookListPanel);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        rightPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     private JPanel inizializzaSezioneSX(){
@@ -298,7 +317,7 @@ public class GestoreLibreriaUI extends JFrame{
             System.err.println("Impossibile caricare FlatLaf");
         }
         BookRepositoryImplementor repo = new SQLiteBookRepository();
-        BookManager db = new ConcreteBookManager(repo);
+        ConcreteBookManager db = new ConcreteBookManager(repo);
         SwingUtilities.invokeLater(() -> {
             GestoreLibreriaUI UI = new GestoreLibreriaUI(db);
             UI.setVisible(true);
