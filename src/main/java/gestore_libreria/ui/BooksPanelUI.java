@@ -5,14 +5,16 @@ import gestore_libreria.model.Book;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 public class BooksPanelUI extends JPanel {
     private JPanel bookListPanel;
+    private Consumer<Book> onBookClickListener;
 
     public BooksPanelUI() {
         setLayout(new BorderLayout());
-        setBorder(BorderFactory.createTitledBorder("Lista Libri"));
+        //setBorder(BorderFactory.createTitledBorder("Lista Libri"));
 
         bookListPanel = new JPanel();
         bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
@@ -20,7 +22,11 @@ public class BooksPanelUI extends JPanel {
         JScrollPane scrollPane = new JScrollPane(bookListPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        add(new JScrollPane(bookListPanel), BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+    public void setOnBookClickListener(Consumer<Book> onBookClickListener) {
+        this.onBookClickListener = onBookClickListener;
     }
 
     //metodo che verrà richiamato per aggiornare la lista dei libri con l'observer

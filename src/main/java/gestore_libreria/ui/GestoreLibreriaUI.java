@@ -19,7 +19,7 @@ import gestore_libreria.observer.ConcreteBookObserver;
 public class GestoreLibreriaUI extends JFrame{
 
     private ConcreteBookManager db;
-    private BookObserver bookObserver;
+    private ConcreteBookObserver bookObserver;
     private BooksPanelUI booksPanelUI;
 
     public GestoreLibreriaUI(ConcreteBookManager db){

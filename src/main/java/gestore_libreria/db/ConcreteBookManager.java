@@ -18,6 +18,7 @@ public class ConcreteBookManager extends Subject implements BookManager  {
     @Override
     public void addBook(Book book) {
         repository.save(book);
+        super.notifyObservers();
     }
 
     @Override

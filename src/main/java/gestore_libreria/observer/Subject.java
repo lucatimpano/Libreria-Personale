@@ -5,7 +5,11 @@ import java.util.Observer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Subject {
-    private CopyOnWriteArrayList<BookObserver> observers;
+    private List<BookObserver> observers;
+
+    public Subject() {
+        observers = new CopyOnWriteArrayList<>();
+    }
 
     public void attach(BookObserver observer) {
         if(!observers.contains(observer)) {
@@ -22,7 +26,7 @@ public abstract class Subject {
 
     public void notifyObservers() {
         for (BookObserver observer : observers) {
-            observers.notify();
+            observer.update();
         }
     }
 
