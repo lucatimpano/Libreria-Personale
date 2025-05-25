@@ -4,6 +4,8 @@ import gestore_libreria.model.Book;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,6 +44,29 @@ public class BooksPanelUI extends JPanel {
                 JPanel bookPanel = new JPanel(new BorderLayout());
                 bookPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
                 bookPanel.setForeground(Color.WHITE); // Colore del testo per i pannelli dei libri
+
+                //Mouse Listener
+                bookPanel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (onBookClickListener != null) {
+                            onBookClickListener.accept(book); // Notifica il listener con il libro cliccato
+                        }
+                    }
+
+                    // Effetti visivi al passaggio del mouse (opzionale, per migliorare l'UX)
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        bookPanel.setBackground(new Color(78, 78, 78)); // Colore più chiaro al passaggio
+                        bookPanel.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Cursore a mano
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        bookPanel.setBackground(new Color(30,30,30)); // Torna al colore originale
+                        bookPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); // Cursore normale
+                    }
+                });
 
                 // Copertina
                 JLabel coverLabel = new JLabel();
