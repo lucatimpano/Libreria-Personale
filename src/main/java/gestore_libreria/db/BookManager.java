@@ -4,35 +4,17 @@ import gestore_libreria.model.Book;
 
 import java.util.List;
 
-public abstract class BookManager {
+// Questa è ora un'INTERFACCIA
+public interface BookManager {
 
-    //classe che definisce l'astrazione del database, il client interagirà con la seguente classe
+    void addBook(Book book);
 
-    protected final BookRepositoryImplementor repository;
+    List<Book> getAllBook();
 
-    public BookManager(BookRepositoryImplementor repository){
-        this.repository = repository;
-    }
+    List<Book> findBookByTitle(String title);
 
-    public void addBook(Book book){
-        repository.save(book);
-    }
+    List<Book> filterBookByRating(int rating);
 
-    public List<Book> getAllBook(){
-        return repository.loadAll();
-    }
-
-    public List<Book> findBookByTitle(String title){
-        return repository.findByTitle(title);
-    }
-
-    public List<Book> filterBookByRating(int rating){
-        return repository.findByRating(rating);
-    }
-
-    public List<Book> filterBookByReadingState(String readingState){
-        return repository.findByReadingState(readingState);
-    }
-
+    List<Book> filterBookByReadingState(String readingState);
 
 }
