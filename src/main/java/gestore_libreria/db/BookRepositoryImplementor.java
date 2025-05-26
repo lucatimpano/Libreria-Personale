@@ -14,4 +14,6 @@ public interface BookRepositoryImplementor {
     List<Book> findByTitle(String title);
     List<Book> findByRating(int rating);
     List<Book> findByReadingState(String readingState);
+    void delete(Book book);
+    void update(Book book);
 }

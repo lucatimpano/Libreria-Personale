@@ -2,6 +2,7 @@ package gestore_libreria.model;
 
 public class Book {
     //dichiaro le variabili del libro
+    private int id;
     //obbligatori
     private final String title;
     private final String author;
@@ -22,6 +23,7 @@ public class Book {
         this.rating = builder.rating;
         this.readingState = builder.readingState;
         this.coverPath = builder.coverPath;
+        this.id = builder.id;
     }
 
     //getter per la lettura
@@ -54,6 +56,14 @@ public class Book {
         return coverPath;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
@@ -69,6 +79,8 @@ public class Book {
 
     //builder per la costruzione dell'oggetto libro
     public static class Builder{
+
+
         //obbligatori
         private final String title;
         private final String author;
@@ -77,8 +89,9 @@ public class Book {
         private String isbn = "";
         private String genre = "";
         private int rating = 0;
-        private String readingState = "";
+        private String readingState = "da leggere";
         private String coverPath = "";        //per le immagini di copertina
+        private int id = 0;
 
         public Builder(String title, String author) {
             if(title == null || title.isBlank() || author == null || author.isEmpty()){
@@ -109,13 +122,19 @@ public class Book {
 
         public Builder readingState(String state) {
             if (!state.matches("letto|in lettura|da leggere"))
-                throw new IllegalArgumentException("Stato non valido");
+                this.readingState = "da leggere";
+                //throw new IllegalArgumentException("Stato non valido");
             this.readingState = state;
             return this;
         }
 
         public Builder coverPath(String path) {
             this.coverPath = path;
+            return this;
+        }
+
+        public Builder id(int id) {
+            this.id = id;
             return this;
         }
 

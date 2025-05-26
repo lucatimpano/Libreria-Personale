@@ -40,4 +40,14 @@ public class ConcreteBookManager extends Subject implements BookManager  {
     public List<Book> filterBookByReadingState(String readingState) {
         return repository.findByReadingState(readingState);
     }
+
+    @Override
+    public void updateBook(Book book) {
+        repository.update(book);
+    }
+
+    @Override
+    public void deleteBook(Book book) {
+        repository.delete(book);
+    }
 }
