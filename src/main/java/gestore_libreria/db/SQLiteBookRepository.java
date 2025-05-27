@@ -79,7 +79,9 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
             ResultSet resultSet = statement.executeQuery(sql);
 
             while (resultSet.next()){
+
                 Book book = new Book.Builder(resultSet.getString("title"), resultSet.getString("author"))
+                        .id(resultSet.getInt("id"))
                         .isbn(resultSet.getString("isbn"))
                         .genre(resultSet.getString("genre"))
                         .rating(resultSet.getInt("rating"))
@@ -148,7 +150,28 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 
     @Override
     public List<Book> findByReadingState(String readingState) {
-        return List.of();
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE LOWER(readingState) LIKE LOWER(?)";
+        try{
+            Connection connection = DatabaseConnectionSingleton.getInstance();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, "%" + readingState + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                Book book = new Book.Builder(resultSet.getString("title"), resultSet.getString("author"))
+                        .id(resultSet.getInt("id"))
+                        .isbn(resultSet.getString("isbn"))
+                        .genre(resultSet.getString("genre"))
+                        .rating(resultSet.getInt("rating"))
+                        .readingState(resultSet.getString("readingState"))
+                        .coverPath(resultSet.getString("coverPath"))
+                        .build();
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            System.err.println("Errore nella ricerca del libro dallo stato di lettura");
+        }
+        return books;
     }
 
     @Override
@@ -174,23 +197,80 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 
     @Override
     public void update(Book book) {
+        String sql = """
+                UPDATE books SET
+                title=?,
+                author=?,
+                isbn=?,
+                genre=?,
+                rating=?,
+                readingState=?,
+                coverPath=?
+                WHERE id=?
+                """;
+        try{
+            Connection connection = DatabaseConnectionSingleton.getInstance();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, book.getTitle());
+            preparedStatement.setString(2, book.getAuthor());
+            preparedStatement.setString(3, book.getIsbn());
+            preparedStatement.setString(4, book.getGenre());
+            preparedStatement.setInt(5, book.getRating());
+            preparedStatement.setString(6, book.getReadingState());
+            preparedStatement.setString(7, book.getCoverPath());
+            preparedStatement.setInt(8, book.getId());      //il libro aggiornato deve avere lo stesso id del libro da modificare
+
+            int affectedRows = preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Errore nell'aggiornamento del libro");
+            e.printStackTrace();
+        }
 
     }
 
 
-//    public static void main(String[] args) throws InterruptedException {
+//    public static void main(String[] args) {
 //        SQLiteBookRepository repo = new SQLiteBookRepository();
-//        for(int i = 0;i < 10;i++){
-//            Book book = new Book.Builder("Prova" + i, "Autore" + i).isbn("12ab32sda1" + i).rating(3).build();
-//            repo.save(book);
-//        }
-//        Thread.sleep(10000);
-//        System.out.println(repo.findByTitle("Prova2"));
-//        System.out.println(repo.findByRating(3));
 //
+//        // Pulizia iniziale del database
+//        try (Connection conn = DatabaseConnectionSingleton.getInstance();
+//             Statement stmt = conn.createStatement()) {
+//            stmt.execute("DELETE FROM books");
+//            System.out.println("DB pulito.");
+//        } catch (SQLException e) {
+//            System.err.println("Errore nella pulizia: " + e.getMessage());
+//        }
+//
+//        // Inserisco un libro
+//        Book libro = new Book.Builder("Il Signore degli Anelli", "J.R.R. Tolkien")
+//                .isbn("978-0544003415")
+//                .genre("Fantasy")
+//                .rating(5)
+//                .readingState("letto")
+//                .coverPath("copertine/lotr.jpg")
+//                .build();
+//
+//        repo.save(libro);
+//        System.out.println("Libro inserito: " + libro);
+//
+//        // Modifico lo stesso libro
+//        Book modificato = new Book.Builder("Il Signore degli Anelli - Edizione Estesa", libro.getAuthor())
+//                .id(libro.getId())
+//                .isbn("978-0544003415")
+//                .genre("Fantasy Epico")
+//                .rating(5)
+//                .readingState("letto")
+//                .coverPath("copertine/lotr_ext.jpg")
+//                .build();
+//
+//        repo.update(modificato);
+//        System.out.println("Libro aggiornato.");
+//
+//        // Carico tutti i libri e li stampo
+//        List<Book> libri = repo.loadAll();
+//        libri.forEach(System.out::println);
 //    }
-
-
 
 
 }
