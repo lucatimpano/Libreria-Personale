@@ -80,6 +80,17 @@ public class GestoreLibreriaUI extends JFrame{
         searchField.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         rightPanel.add(searchField, BorderLayout.NORTH);
 
+        // Listener per la ricerca
+        searchField.addActionListener(e -> {
+            String searchText = searchField.getText().trim();
+            if (!searchText.isEmpty() && !searchText.equals("Search")) {
+                List<Book> searchResults = db.findBookByTitle(searchText);
+                booksPanelUI.displayBooks(searchResults);
+            } else {
+                booksPanelUI.displayBooks(db.getAllBook());
+            }
+        });
+
         // Lista dei libri dal database
 //        JPanel bookListPanel = new JPanel();
 //        bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
@@ -89,6 +100,7 @@ public class GestoreLibreriaUI extends JFrame{
         return rightPanel;
     }
 
+    //!Metodo non usato, da rimuovere
     private void getAllBook(JPanel bookListPanel, JPanel rightPanel){
 
         List<Book> books = db.getAllBook();
@@ -137,15 +149,16 @@ public class GestoreLibreriaUI extends JFrame{
         StatoBottoni.setLayout(new BoxLayout(StatoBottoni, BoxLayout.Y_AXIS));
         StatoBottoni.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        JButton lettoBtn = new JButton("All");
-        JButton inLetturaBtn = new JButton("Reading");
-        JButton daLeggereBtn = new JButton("Unread");
+        JButton AllBtn = new JButton("All");
+        JButton lettiBtn = new JButton("Letti");
+        JButton inLetturaBtn = new JButton("In lettura");
+        JButton daLeggereBtn = new JButton("Da leggere");
 
         Dimension buttonSize = new Dimension(160, 35);
         Color selectedColor = new Color(53, 53, 53);
         Color defaultColor = new Color(30, 30, 30);
 
-        JButton[] stateButtons = {lettoBtn, inLetturaBtn, daLeggereBtn};
+        JButton[] stateButtons = {AllBtn,lettiBtn, inLetturaBtn, daLeggereBtn};
 
         for (JButton btn : stateButtons) {
             btn.setPreferredSize(buttonSize);
@@ -161,14 +174,38 @@ public class GestoreLibreriaUI extends JFrame{
         }
 
         // Gestione selezione
-        for (JButton btn : stateButtons) {
-            btn.addActionListener(e -> {
-                for (JButton b : stateButtons) {
-                    b.setBackground(defaultColor);
-                }
-                btn.setBackground(selectedColor);
-            });
-        }
+//        for (JButton btn : stateButtons) {
+//            btn.addActionListener(e -> {
+//                for (JButton b : stateButtons) {
+//                    b.setBackground(defaultColor);
+//                }
+//                btn.setBackground(selectedColor);
+//            });
+//        }
+
+        //gestione selezione2
+        AllBtn.addActionListener(e -> {
+            booksPanelUI.displayBooks(db.getAllBook()); // Mostra tutti i libri
+            highlightButton(AllBtn, stateButtons, selectedColor, defaultColor); // Evidenzia il bottone
+        });
+
+        lettiBtn.addActionListener(e -> {
+            booksPanelUI.displayBooks(db.filterBookByReadingState("LETTO")); // Filtra per "LETTO"
+            highlightButton(lettiBtn, stateButtons, selectedColor, defaultColor);
+        });
+
+        inLetturaBtn.addActionListener(e -> {
+            booksPanelUI.displayBooks(db.filterBookByReadingState("IN LETTURA")); // Filtra per "IN LETTURA"
+            highlightButton(inLetturaBtn, stateButtons, selectedColor, defaultColor);
+        });
+
+        daLeggereBtn.addActionListener(e -> {
+            booksPanelUI.displayBooks(db.filterBookByReadingState("DA LEGGERE")); // Filtra per "DA LEGGERE"
+            highlightButton(daLeggereBtn, stateButtons, selectedColor, defaultColor);
+        });
+
+        // Imposta il bottone "Tutti i Libri" come selezionato di default all'avvio
+        highlightButton(AllBtn, stateButtons, selectedColor, defaultColor);
 
         //titolo applicazione
         JPanel titlePanel = new JPanel(new BorderLayout());
@@ -185,6 +222,13 @@ public class GestoreLibreriaUI extends JFrame{
 
         return leftPanel;
 
+    }
+
+    private void highlightButton(JButton selectedButton, JButton[] buttons, Color selectedColor, Color defaultColor) {
+        for (JButton btn : buttons) {
+            btn.setBackground(defaultColor);
+        }
+        selectedButton.setBackground(selectedColor);
     }
 
     private JButton addBookButton(){

@@ -248,7 +248,6 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 //                .genre("Fantasy")
 //                .rating(5)
 //                .readingState("letto")
-//                .coverPath("copertine/lotr.jpg")
 //                .build();
 //
 //        repo.save(libro);
@@ -261,7 +260,6 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
 //                .genre("Fantasy Epico")
 //                .rating(5)
 //                .readingState("letto")
-//                .coverPath("copertine/lotr_ext.jpg")
 //                .build();
 //
 //        repo.update(modificato);
