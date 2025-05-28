@@ -2,16 +2,20 @@ package gestore_libreria.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.sql.SQLException;
 import java.util.List;
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.intellijthemes.FlatDarkFlatIJTheme;
 import com.formdev.flatlaf.themes.*;
-import gestore_libreria.db.BookManager;
-import gestore_libreria.db.BookRepositoryImplementor;
-import gestore_libreria.db.ConcreteBookManager;
-import gestore_libreria.db.SQLiteBookRepository;
+import gestore_libreria.db.*;
 import gestore_libreria.model.Book;
 import gestore_libreria.observer.BookObserver;
 import gestore_libreria.observer.ConcreteBookObserver;
@@ -37,8 +41,10 @@ public class GestoreLibreriaUI extends JFrame{
         JFrame.setDefaultLookAndFeelDecorated(true);
         JDialog.setDefaultLookAndFeelDecorated(true);
 
+        setJMenuBar(creaMenuBar());
+
         JPanel mainPanel = new JPanel(new BorderLayout());
-        add(mainPanel);
+        setContentPane(mainPanel);
 
         //sezione sx
         JPanel leftPanel = inizializzaSezioneSX();
@@ -49,7 +55,10 @@ public class GestoreLibreriaUI extends JFrame{
         mainPanel.add(rightPanel, BorderLayout.CENTER);
 
         this.booksPanelUI = new BooksPanelUI();
-        rightPanel.add(booksPanelUI);
+        rightPanel.add(booksPanelUI, BorderLayout.CENTER);
+
+        booksPanelUI.setOnBookClickListener(this::showBookDetails);
+        booksPanelUI.setOnDeleteBookListener(this::showPopupMenu);
 
         this.bookObserver = new ConcreteBookObserver(this.booksPanelUI,this.db);
 
@@ -65,6 +74,176 @@ public class GestoreLibreriaUI extends JFrame{
             }
         });
 
+    }
+
+    private void showBookDetails(Book book) {
+        JTextField titoloField = new JTextField(book.getTitle(), 20);
+        JTextField autoreField = new JTextField(book.getAuthor(), 20);
+        JTextField isbnField = new JTextField(book.getIsbn() != null ? book.getIsbn() : "", 20);
+        JTextField genreField = new JTextField(book.getGenre() != null ? book.getGenre() : "", 20);
+        JSpinner ratingSpinner = new JSpinner(new SpinnerNumberModel(book.getRating(), 1, 5, 1));
+        String[] statiLettura = {"DA LEGGERE", "IN LETTURA", "LETTO"};
+        JComboBox<String> statoCombo = new JComboBox<>(statiLettura);
+        statoCombo.setSelectedItem(book.getReadingState() != null ? book.getReadingState() : "DA LEGGERE");
+
+        JTextField imagePathField = new JTextField(book.getCoverPath() != null ? book.getCoverPath() : "", 15);
+        imagePathField.setEditable(false);
+        JButton browseBtn = new JButton("Sfoglia");
+        browseBtn.setEnabled(false);
+
+        JLabel imagePreview = new JLabel();
+        int width = 120;
+        int height = 180;
+        imagePreview.setPreferredSize(new Dimension(width, height));
+
+        ImageIcon selectedIcon = loadAndScaleImage(book.getCoverPath(), width, height);
+        if (selectedIcon != null) {
+            imagePreview.setIcon(selectedIcon);
+        } else {
+            ImageIcon placeholder = new ImageIcon("src/main/resources/images/image_placeholder.png");
+            imagePreview.setIcon(new ImageIcon(placeholder.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+        }
+
+        JPanel imageWrapper = new JPanel();
+        imageWrapper.setLayout(new BorderLayout());
+        imageWrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+        imageWrapper.add(imagePreview, BorderLayout.CENTER);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(new JLabel("Titolo:"));
+        panel.add(titoloField);
+        panel.add(new JLabel("Autore:"));
+        panel.add(autoreField);
+        panel.add(new JLabel("Genere:"));
+        panel.add(genreField);
+        panel.add(new JLabel("ISBN:"));
+        panel.add(isbnField);
+        panel.add(new JLabel("Rating (1-5):"));
+        panel.add(ratingSpinner);
+        panel.add(new JLabel("Stato lettura:"));
+        panel.add(statoCombo);
+        panel.add(new JLabel("Copertina:"));
+        JPanel filePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        filePanel.add(imagePathField);
+        filePanel.add(browseBtn);
+        panel.add(filePanel);
+
+        JPanel BookPanel = new JPanel(new BorderLayout());
+        BookPanel.add(panel, BorderLayout.CENTER);
+        BookPanel.add(imageWrapper, BorderLayout.NORTH);
+        imageWrapper.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        // Disabilita tutti i campi per la sola visualizzazione
+        titoloField.setEditable(false);
+        autoreField.setEditable(false);
+        isbnField.setEditable(false);
+        genreField.setEditable(false);
+        ratingSpinner.setEnabled(false);
+        statoCombo.setEnabled(false);
+
+        JOptionPane.showConfirmDialog(this, BookPanel, "Dettagli Libro", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private void showPopupMenu(Book book) {
+        //TODO
+        System.out.println("Richiesta di eliminazione per il libro: " + book.getTitle());
+    }
+
+    private JMenuBar creaMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenu editMenu = new JMenu("Edit");
+
+        //sezione file
+
+        JMenuItem exportDB = new JMenuItem("Esporta Database");
+        exportDB.addActionListener(e -> esportaDatabase());
+
+        JMenuItem importDB = new JMenuItem("Importa Database");
+        importDB.addActionListener(e -> importaDatabase());
+
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.addActionListener(e -> {
+            DatabaseConnectionSingleton.closeConnection();
+            System.exit(0);
+
+        });
+
+        //sezione edit
+        JMenuItem undo = new JMenuItem("Undo");
+        JMenuItem redo = new JMenuItem("Redo");
+
+        fileMenu.add(exportDB);
+        fileMenu.add(importDB);
+        fileMenu.addSeparator();
+        fileMenu.add(exit);
+
+        editMenu.add(undo);
+        editMenu.add(redo);
+
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
+        return menuBar;
+    }
+
+    private void esportaDatabase() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Esporta Database");
+        fileChooser.setSelectedFile(new File("books_backup.db"));
+
+        int userSelection = fileChooser.showOpenDialog(this);
+
+        if(userSelection == JFileChooser.APPROVE_OPTION){
+            File selectedFile = fileChooser.getSelectedFile();
+            try{
+                DatabaseConnectionSingleton.closeConnection();
+                Files.copy(new File("Books_db.db").toPath(), selectedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                JOptionPane.showMessageDialog(this, "Database esportato con successo.");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Errore nell'esportazione del database.");
+            }finally {
+                try {
+                    DatabaseConnectionSingleton.getInstance();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                booksPanelUI.displayBooks(db.getAllBook());
+            }
+        }
+    }
+
+    private void importaDatabase(){
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Importa Database");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("SQLite Database Files (*.db)", "db"));
+
+        int userSelection = fileChooser.showOpenDialog(this);
+
+        if(userSelection == JFileChooser.APPROVE_OPTION){
+            File selectedFile = fileChooser.getSelectedFile();
+
+            int confirm = JOptionPane.showConfirmDialog(this, "L'importazione sovrascriverà il database esistente, sei sicuro di voler continuare?","Conferma Importazione", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+            if(confirm == JOptionPane.YES_OPTION){
+                try{
+                    DatabaseConnectionSingleton.closeConnection();
+                    Files.copy(selectedFile.toPath(), new File("Books_db.db").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    JOptionPane.showMessageDialog(this, "Database importato con successo.");
+
+                    DatabaseConnectionSingleton.getInstance();
+
+                    db = new ConcreteBookManager(new SQLiteBookRepository());
+                    bookObserver.unsubscribe();
+                    bookObserver = new ConcreteBookObserver(this.booksPanelUI,this.db);
+
+                    booksPanelUI.displayBooks(db.getAllBook());
+                }catch (IOException | SQLException e){
+                    JOptionPane.showMessageDialog(this, "Errore durante l'importazione del database: " + e.getMessage(), "Errore Importazione", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+        }
     }
 
     private JPanel inizializzaSezioneDX(){
@@ -352,7 +531,6 @@ public class GestoreLibreriaUI extends JFrame{
             return null;
         }
     }
-
 
     public static void main(String[] args) {
         try{

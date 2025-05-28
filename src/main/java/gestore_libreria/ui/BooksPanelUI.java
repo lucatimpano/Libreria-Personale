@@ -13,11 +13,14 @@ import java.util.function.Consumer;
 
 public class BooksPanelUI extends JPanel {
     private JPanel bookListPanel;
-    private Consumer<Book> onBookClickListener;
+    private Consumer<Book> onBookClickListener;     //click per i dettagli del libro
+    private Consumer<Book> onDeleteBookListener;    //click destro per eliminare un libro
     // Colori per lo stato di lettura
     private static final Color READING_STATE_COLOR = new Color(252, 202, 70);
     private static final Color UNREAD_STATE_COLOR = new Color(90, 93, 95);
     private static final Color READ_STATE_COLOR = new Color(112, 224, 0);
+
+    private JPopupMenu popupMenu;
 
     public BooksPanelUI() {
         setLayout(new BorderLayout());
@@ -30,11 +33,52 @@ public class BooksPanelUI extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         add(scrollPane, BorderLayout.CENTER);
+
+        inizializzaPopupMenu();
+    }
+
+    public void setOnDeleteBookListener(Consumer<Book> onDeleteBookListener) {
+        this.onDeleteBookListener = onDeleteBookListener;
     }
 
     public void setOnBookClickListener(Consumer<Book> onBookClickListener) {
         this.onBookClickListener = onBookClickListener;
     }
+
+    private void inizializzaPopupMenu() {
+        popupMenu = new JPopupMenu();
+        JMenuItem deleteItem = new JMenuItem("Elimina");
+        deleteItem.setForeground(Color.RED);
+        deleteItem.addActionListener(e -> {});      //TODO
+        popupMenu.add(deleteItem);
+    }
+
+    private void showPopupMenu(MouseEvent e, Book book) {
+        if (e.isPopupTrigger()) { // isPopupTrigger() verifica se è un evento di click destro (o equivalente su altri OS)
+            // Collega l'azione "Elimina" al libro specifico
+            // Rimuovi eventuali listener precedenti per evitare duplicati se il popup è riusato
+            for (int i = 0; i < popupMenu.getComponentCount(); i++) {
+                Component comp = popupMenu.getComponent(i);
+                if (comp instanceof JMenuItem menuItem) {
+                    if (menuItem.getText().equals("Elimina")) {
+                        // Rimuove tutti gli ActionListener esistenti per "Elimina"
+                        for (java.awt.event.ActionListener al : menuItem.getActionListeners()) {
+                            menuItem.removeActionListener(al);
+                        }
+                        // Aggiunge il listener per l'eliminazione specifica di questo libro
+                        menuItem.addActionListener(actionEvent -> {
+                            if (onDeleteBookListener != null) {
+                                onDeleteBookListener.accept(book); // Notifica il listener esterno con il libro da eliminare
+                            }
+                        });
+                        break; // Trovato e configurato l'elemento "Elimina"
+                    }
+                }
+            }
+            popupMenu.show(e.getComponent(), e.getX(), e.getY());
+        }
+    }
+
 
     //metodo che verrà richiamato per aggiornare la lista dei libri con l'observer
     public void displayBooks(List<Book> books) {
@@ -61,9 +105,12 @@ public class BooksPanelUI extends JPanel {
                 bookPanel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (onBookClickListener != null) {
-                            onBookClickListener.accept(book); // Notifica il listener con il libro cliccato
+                        if(SwingUtilities.isLeftMouseButton(e)) {
+                            if (onBookClickListener != null) {
+                                onBookClickListener.accept(book); // Notifica il listener con il libro cliccato
+                            }
                         }
+
                     }
 
                     // Effetti visivi al passaggio del mouse
@@ -78,7 +125,19 @@ public class BooksPanelUI extends JPanel {
                         bookPanel.setBackground(new Color(30,30,30)); // Torna al colore originale
                         bookPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); // Cursore normale
                     }
+
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        showPopupMenu(e, book);
+                    }
+
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
+                        showPopupMenu(e, book);
+                    }
                 });
+
+
 
                 // Copertina
                 JLabel coverLabel = new JLabel();
@@ -110,6 +169,10 @@ public class BooksPanelUI extends JPanel {
                 }
                 bookPanel.add(coverLabel, BorderLayout.WEST);
                 buildSingleElement(book, bookPanel);
+
+                // spacing
+                bookListPanel.add(bookPanel);
+                //bookListPanel.add(Box.createRigidArea(new Dimension(0, 6)));
 
             }
         }
@@ -181,8 +244,6 @@ public class BooksPanelUI extends JPanel {
         // aggiungo center al row
         row.add(center, BorderLayout.CENTER);
 
-        // spacing
-        bookListPanel.add(row);
-        bookListPanel.add(Box.createRigidArea(new Dimension(0, 6)));
+
     }
 }
