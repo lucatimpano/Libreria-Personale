@@ -17,7 +17,7 @@ public interface BookManager {
 
     List<Book> filterBookByReadingState(String readingState);
 
-    void updateBook(Book book);
+    void updateBook(Book oldBook, Book book);
 
     void deleteBook(Book book);
 

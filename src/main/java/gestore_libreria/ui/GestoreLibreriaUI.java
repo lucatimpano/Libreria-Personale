@@ -26,6 +26,9 @@ public class GestoreLibreriaUI extends JFrame{
     private ConcreteBookObserver bookObserver;
     private BooksPanelUI booksPanelUI;
 
+    private JMenuItem undo;
+    private JMenuItem redo;
+
     public GestoreLibreriaUI(ConcreteBookManager db){
         super("Gestore Libreria");
         this.db = db;
@@ -58,9 +61,11 @@ public class GestoreLibreriaUI extends JFrame{
         rightPanel.add(booksPanelUI, BorderLayout.CENTER);
 
         booksPanelUI.setOnBookClickListener(this::showBookDetails);
-        booksPanelUI.setOnDeleteBookListener(this::showPopupMenu);
+        booksPanelUI.setOnDeleteBookListener(this::PopupMenuAction);
 
-        this.bookObserver = new ConcreteBookObserver(this.booksPanelUI,this.db);
+        this.bookObserver = new ConcreteBookObserver(this,this.booksPanelUI,this.db);
+
+        updateUndoRedoMenuState();
 
         setVisible(true);
 
@@ -145,9 +150,9 @@ public class GestoreLibreriaUI extends JFrame{
         JOptionPane.showConfirmDialog(this, BookPanel, "Dettagli Libro", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
-    private void showPopupMenu(Book book) {
-        //TODO
+    private void PopupMenuAction(Book book) {
         System.out.println("Richiesta di eliminazione per il libro: " + book.getTitle());
+        db.deleteBook(book);
     }
 
     private JMenuBar creaMenuBar() {
@@ -171,8 +176,15 @@ public class GestoreLibreriaUI extends JFrame{
         });
 
         //sezione edit
-        JMenuItem undo = new JMenuItem("Undo");
-        JMenuItem redo = new JMenuItem("Redo");
+        undo = new JMenuItem("Undo");
+        undo.addActionListener(e -> {
+            db.getHistoryManager().undo();
+        });
+
+        redo = new JMenuItem("Redo");
+        redo.addActionListener(e -> {
+            db.getHistoryManager().redo();
+        });
 
         fileMenu.add(exportDB);
         fileMenu.add(importDB);
@@ -185,6 +197,13 @@ public class GestoreLibreriaUI extends JFrame{
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         return menuBar;
+    }
+
+    public void updateUndoRedoMenuState() {
+        if (db != null && db.getHistoryManager() != null) {
+            undo.setEnabled(db.getHistoryManager().canUndo());
+            redo.setEnabled(db.getHistoryManager().canRedo());
+        }
     }
 
     private void esportaDatabase() {
@@ -235,7 +254,7 @@ public class GestoreLibreriaUI extends JFrame{
 
                     db = new ConcreteBookManager(new SQLiteBookRepository());
                     bookObserver.unsubscribe();
-                    bookObserver = new ConcreteBookObserver(this.booksPanelUI,this.db);
+                    bookObserver = new ConcreteBookObserver(this,this.booksPanelUI,this.db);
 
                     booksPanelUI.displayBooks(db.getAllBook());
                 }catch (IOException | SQLException e){
