@@ -33,11 +33,11 @@ public class BookHistoryManager {
     }
 
     public BookMemento undo() {
-        if (undoStack.isEmpty()) {
+        if (!undoStack.isEmpty()) {
             BookMemento memento = undoStack.pop();
             redoStack.push(memento);        //prendo il memento dalla pila undo e lo sposto nella pila redo
             if (restoreListener != null) {
-                restoreListener.restore(memento, ActionDirection.REDO);
+                restoreListener.restore(memento, ActionDirection.UNDO);
             }
             return memento;
         }
@@ -46,7 +46,7 @@ public class BookHistoryManager {
 
     //la redo sara il complementare di redo
     public BookMemento redo() {
-        if (redoStack.isEmpty()) {
+        if (!redoStack.isEmpty()) {
             BookMemento memento = redoStack.pop();
             undoStack.push(memento);
             if (restoreListener != null) {
