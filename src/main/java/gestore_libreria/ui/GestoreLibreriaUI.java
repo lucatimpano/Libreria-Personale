@@ -2,7 +2,6 @@ package gestore_libreria.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -10,14 +9,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.intellijthemes.FlatDarkFlatIJTheme;
 import com.formdev.flatlaf.themes.*;
 import gestore_libreria.db.*;
 import gestore_libreria.model.Book;
-import gestore_libreria.observer.BookObserver;
 import gestore_libreria.observer.ConcreteBookObserver;
 
 public class GestoreLibreriaUI extends JFrame{
@@ -140,19 +138,86 @@ public class GestoreLibreriaUI extends JFrame{
         imageWrapper.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         // Disabilita tutti i campi per la sola visualizzazione
-        titoloField.setEditable(false);
-        autoreField.setEditable(false);
-        isbnField.setEditable(false);
-        genreField.setEditable(false);
-        ratingSpinner.setEnabled(false);
-        statoCombo.setEnabled(false);
+        setFieldsEditable(false, titoloField, autoreField, isbnField, genreField, ratingSpinner, statoCombo, browseBtn, imagePathField);
 
-        JOptionPane.showConfirmDialog(this, BookPanel, "Dettagli Libro", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
+        String[] options = {"Modifica", "<html><font color='red'>Elimina</font></html>", "Chiudi"};
+        int choice = JOptionPane.showOptionDialog(this, BookPanel, "Dettagli Libro",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+                null, options, options[2]);
+        if (choice == 0) {
+            setFieldsEditable(true, titoloField, autoreField, isbnField, genreField, ratingSpinner, statoCombo, browseBtn, imagePathField);
+            browseButtonAction(browseBtn, imagePathField, imagePreview, width, height);
+
+            int result = JOptionPane.showConfirmDialog(this, BookPanel, "Modifica Libro", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result == JOptionPane.OK_OPTION) {
+                String newTitolo = titoloField.getText().trim();
+                String newAutore = autoreField.getText().trim();
+                String newIsbn = isbnField.getText().trim();
+                String newGenre = genreField.getText().trim();
+                int newRating = (Integer) ratingSpinner.getValue();
+                String newStato = (String) statoCombo.getSelectedItem();
+                String newPath = imagePathField.getText().trim();
+
+                if (!newTitolo.isEmpty() && !newAutore.isEmpty()) {
+                    Book updatedBook = new Book.Builder(newTitolo, newAutore)
+                            .id(book.getId())
+                            .isbn(newIsbn)
+                            .rating(newRating)
+                            .readingState(newStato)
+                            .coverPath(newPath)
+                            .genre(newGenre)
+                            .build();
+
+                    db.updateBook(book, updatedBook); // Passo sia il vecchio che il nuovo libro per l'undo/redo
+                    JOptionPane.showMessageDialog(this, "Libro modificato con successo!", "Successo", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Titolo e autore sono obbligatori.", "Errore", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            setFieldsEditable(false, titoloField, autoreField, isbnField, genreField, ratingSpinner, statoCombo, browseBtn, imagePathField);
+        } else if (choice == 1) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Sei sicuro di voler eliminare il libro '" + book.getTitle() + "'?",
+                    "Conferma Eliminazione", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                db.deleteBook(book);
+                JOptionPane.showMessageDialog(this, "Libro eliminato con successo!", "Successo", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+        //JOptionPane.showConfirmDialog(this, BookPanel, "Dettagli Libro", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private void setFieldsEditable(boolean editable, JTextField titoloField, JTextField autoreField, JTextField isbnField, JTextField genreField, JSpinner ratingSpinner,
+                                   JComboBox<String> statoCombo, JButton browseBtn, JTextField imagePathField) {
+        titoloField.setEditable(editable);
+        autoreField.setEditable(editable);
+        isbnField.setEditable(editable);
+        genreField.setEditable(editable);
+        ratingSpinner.setEnabled(editable);
+        statoCombo.setEnabled(editable);
+        browseBtn.setEnabled(editable);
+        browseBtn.setVisible(editable);
+        if(!editable){
+            imagePathField.setColumns(20);
+        }else{
+            imagePathField.setColumns(15);
+        }
     }
 
     private void PopupMenuAction(Book book) {
-        System.out.println("Richiesta di eliminazione per il libro: " + book.getTitle());
-        db.deleteBook(book);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Sei sicuro di voler eliminare il libro '" + book.getTitle() + "'?",
+                "Conferma Eliminazione",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            db.deleteBook(book);
+            JOptionPane.showMessageDialog(this,
+                    "Libro eliminato con successo!",
+                    "Successo",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     private JMenuBar creaMenuBar() {
@@ -268,65 +333,49 @@ public class GestoreLibreriaUI extends JFrame{
     private JPanel inizializzaSezioneDX(){
         JPanel rightPanel = new JPanel(new BorderLayout());
 
+        JPanel searchBarPanel = new JPanel(new BorderLayout());
         // Barra di ricerca con FlatLaf arrotondata
         JTextField searchField = new JTextField("Search");
         searchField.putClientProperty("JTextField.roundRect", true);
         searchField.setBackground(new Color(53, 53, 53));
         searchField.setForeground(Color.WHITE);
         searchField.setCaretColor(Color.WHITE);
-        searchField.setPreferredSize(new Dimension(150, 30));
+        searchField.setPreferredSize(new Dimension(120, 30));
         searchField.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        rightPanel.add(searchField, BorderLayout.NORTH);
+
+        String[] searchCriteria = {"Titolo", "Autore"};
+        JComboBox<String> searchCriteriaCombo = new JComboBox<>(searchCriteria);
+        searchCriteriaCombo.setPreferredSize(new Dimension(100, 30));
+        searchCriteriaCombo.putClientProperty("JComboBox.is=roundReact",true);
+        searchCriteriaCombo.setBackground(new Color(53, 53, 53));
+        searchCriteriaCombo.setForeground(Color.WHITE);
+
+        searchBarPanel.add(searchField, BorderLayout.CENTER);
+        searchBarPanel.add(searchCriteriaCombo, BorderLayout.EAST);
+
+        rightPanel.add(searchBarPanel, BorderLayout.NORTH);
 
         // Listener per la ricerca
         searchField.addActionListener(e -> {
             String searchText = searchField.getText().trim();
-            if (!searchText.isEmpty() && !searchText.equals("Search")) {
-                List<Book> searchResults = db.findBookByTitle(searchText);
-                booksPanelUI.displayBooks(searchResults);
-            } else {
-                booksPanelUI.displayBooks(db.getAllBook());
+            String criterion = searchCriteriaCombo.getSelectedItem().toString();
+            if(criterion.equals("Titolo")){
+                if (!searchText.isEmpty() && !searchText.equals("Search")) {
+                    List<Book> searchResults = db.findBookByTitle(searchText);
+                    booksPanelUI.displayBooks(searchResults);
+                } else {
+                    booksPanelUI.displayBooks(db.getAllBook());
+                }
+            }else {
+                if (!searchText.isEmpty() && !searchText.equals("Search")) {
+                    List<Book> searchResults = db.findBookByAuthor(searchText);
+                    booksPanelUI.displayBooks(searchResults);
+                } else {
+                    booksPanelUI.displayBooks(db.getAllBook());
+                }
             }
         });
-
-        // Lista dei libri dal database
-//        JPanel bookListPanel = new JPanel();
-//        bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
-//
-//        getAllBook(bookListPanel,rightPanel);
-
         return rightPanel;
-    }
-
-    //!Metodo non usato, da rimuovere
-    private void getAllBook(JPanel bookListPanel, JPanel rightPanel){
-
-        List<Book> books = db.getAllBook();
-        for (Book b : books) {
-            JPanel bookPanel = new JPanel(new BorderLayout());
-            bookPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
-
-            // Copertina
-            JLabel coverLabel = new JLabel();
-            coverLabel.setPreferredSize(new Dimension(60, 90));
-            coverLabel.setOpaque(true);
-            coverLabel.setBackground(Color.LIGHT_GRAY);
-            // carica immagine se presente
-            if (!b.getCoverPath().isBlank()) {
-                ImageIcon icon = new ImageIcon(b.getCoverPath());
-                Image img = icon.getImage().getScaledInstance(60, 90, Image.SCALE_SMOOTH);
-                coverLabel.setIcon(new ImageIcon(img));
-                coverLabel.setBackground(null);
-            }
-            bookPanel.add(coverLabel, BorderLayout.WEST);
-
-            // Info titolo e autore
-            JLabel infoLabel = new JLabel(b.getTitle() + " - " + b.getAuthor());
-            infoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            bookPanel.add(infoLabel, BorderLayout.CENTER);
-
-            bookListPanel.add(bookPanel);
-        }
     }
 
     private JPanel inizializzaSezioneSX(){
@@ -339,8 +388,6 @@ public class GestoreLibreriaUI extends JFrame{
         JLabel TextLabel = new JLabel("Gestore Libreria");
         TextLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 0));
         TextLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
-
-
 
         // Proprietà dei bottoni
         JPanel StatoBottoni = new JPanel();
@@ -356,7 +403,13 @@ public class GestoreLibreriaUI extends JFrame{
         Color selectedColor = new Color(53, 53, 53);
         Color defaultColor = new Color(30, 30, 30);
 
-        JButton[] stateButtons = {AllBtn,lettiBtn, inLetturaBtn, daLeggereBtn};
+        //JButton[] stateButtons = {AllBtn,lettiBtn, inLetturaBtn, daLeggereBtn};
+
+        List<JButton> stateButtons = new ArrayList<>();
+        stateButtons.add(AllBtn);
+        stateButtons.add(lettiBtn);
+        stateButtons.add(inLetturaBtn);
+        stateButtons.add(daLeggereBtn);
 
         for (JButton btn : stateButtons) {
             btn.setPreferredSize(buttonSize);
@@ -371,17 +424,6 @@ public class GestoreLibreriaUI extends JFrame{
             StatoBottoni.add(btn);
         }
 
-        // Gestione selezione
-//        for (JButton btn : stateButtons) {
-//            btn.addActionListener(e -> {
-//                for (JButton b : stateButtons) {
-//                    b.setBackground(defaultColor);
-//                }
-//                btn.setBackground(selectedColor);
-//            });
-//        }
-
-        //gestione selezione2
         AllBtn.addActionListener(e -> {
             booksPanelUI.displayBooks(db.getAllBook()); // Mostra tutti i libri
             highlightButton(AllBtn, stateButtons, selectedColor, defaultColor); // Evidenzia il bottone
@@ -405,6 +447,32 @@ public class GestoreLibreriaUI extends JFrame{
         // Imposta il bottone "Tutti i Libri" come selezionato di default all'avvio
         highlightButton(AllBtn, stateButtons, selectedColor, defaultColor);
 
+//        JLabel ratingLabel = new JLabel();
+//        StatoBottoni.add(ratingLabel);
+
+        JPanel ratingPanel = new JPanel(); // Pannello per le "stelline"
+        ratingPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Allineamento a sinistra
+
+        for (int i = 1; i <= 5; i++) {
+            JButton starButton = new JButton("★");
+            starButton.setFont(starButton.getFont().deriveFont(16f));
+            starButton.setForeground(Color.ORANGE);
+            starButton.setBackground(new Color(30, 30, 30));
+            starButton.setFocusPainted(false);
+            starButton.setBorderPainted(false);
+            starButton.setOpaque(true);
+            starButton.setMargin(new Insets(0, 0, 0, 0));
+
+            final int currentRating = i; // Per l'uso nella lambda
+            starButton.addActionListener(e -> {
+                booksPanelUI.displayBooks(db.filterBookByRating(currentRating));
+                highlightButton(starButton, stateButtons, selectedColor, defaultColor); // Evidenzia la stella
+            });
+            ratingPanel.add(starButton);
+            stateButtons.add(starButton); // Aggiungi il bottone alla lista
+        }
+        leftPanel.add(ratingPanel);
+
         //titolo applicazione
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.add(TextLabel, BorderLayout.NORTH);
@@ -422,7 +490,8 @@ public class GestoreLibreriaUI extends JFrame{
 
     }
 
-    private void highlightButton(JButton selectedButton, JButton[] buttons, Color selectedColor, Color defaultColor) {
+
+    private void highlightButton(JButton selectedButton, List<JButton> buttons, Color selectedColor, Color defaultColor) {
         for (JButton btn : buttons) {
             btn.setBackground(defaultColor);
         }

@@ -53,6 +53,11 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
     }
 
     @Override
+    public List<Book> findBookByAuthor(String author) {
+        return repository.findByAuthor(author);
+    }
+
+    @Override
     public void updateBook(Book odlBook, Book book) {
         historyManager.save(new BookMemento(book, BookMemento.OperationType.UPDATE, odlBook));
         repository.update(book);

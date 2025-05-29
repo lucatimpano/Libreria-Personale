@@ -175,6 +175,32 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
     }
 
     @Override
+    public List<Book> findByAuthor(String author) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?)";
+        try{
+            Connection connection = DatabaseConnectionSingleton.getInstance();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, "%" + author + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                Book book = new Book.Builder(resultSet.getString("title"), resultSet.getString("author"))
+                        .id(resultSet.getInt("id"))
+                        .isbn(resultSet.getString("isbn"))
+                        .genre(resultSet.getString("genre"))
+                        .rating(resultSet.getInt("rating"))
+                        .readingState(resultSet.getString("readingState"))
+                        .coverPath(resultSet.getString("coverPath"))
+                        .build();
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            System.err.println("Errore nella ricerca del libro dall'autore");
+        }
+        return books;
+    }
+
+    @Override
     public void delete(Book book) {
         int id = book.getId();
         String sql = "Delete FROM books WHERE id = ?";
