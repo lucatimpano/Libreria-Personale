@@ -21,7 +21,6 @@ public abstract class Subject {
         if(observers.contains(observer)) {
             observers.remove(observer);
         }
-
     }
 
     public void notifyObservers() {
@@ -29,5 +28,4 @@ public abstract class Subject {
             observer.update();
         }
     }
-
 }

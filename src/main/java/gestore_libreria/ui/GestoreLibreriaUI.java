@@ -472,7 +472,6 @@ public class GestoreLibreriaUI extends JFrame{
             stateButtons.add(starButton); // Aggiungi il bottone alla lista
         }
         leftPanel.add(ratingPanel);
-
         //titolo applicazione
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.add(TextLabel, BorderLayout.NORTH);
@@ -521,7 +520,7 @@ public class GestoreLibreriaUI extends JFrame{
             int height = 180;
             imagePreview.setPreferredSize(new Dimension(width, height));
 
-            ImageIcon placeholder = new ImageIcon("src/main/resources/images/image_placeholder.png");
+            ImageIcon placeholder = new ImageIcon("images/image_placeholder.png");
             imagePreview.setIcon(new ImageIcon(placeholder.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
 
 
@@ -569,7 +568,7 @@ public class GestoreLibreriaUI extends JFrame{
                 String genre = genreField.getText().trim();
                 int rating = (Integer) ratingSpinner.getValue();
                 String stato = (String) statoCombo.getSelectedItem();
-                String path = "src/main/resources/images/image_placeholder.png";
+                String path = "images/image_placeholder.png";
                 if(!imagePathField.getText().trim().isEmpty()){
                     path = imagePathField.getText().trim();
                 }
