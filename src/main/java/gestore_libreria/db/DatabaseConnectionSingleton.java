@@ -23,7 +23,7 @@ public class DatabaseConnectionSingleton {
         if (instance != null) {
             try {
                 instance.close();
-                instance = null; // Imposta a null per permettere la riapertura
+                instance = null; // Impostiamo a null per permettere la riapertura
                 System.out.println("Connessione al database chiusa.");
             } catch (SQLException e) {
                 System.err.println("Errore durante la chiusura della connessione al database: " + e.getMessage());

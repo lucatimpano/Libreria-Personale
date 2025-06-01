@@ -18,6 +18,14 @@ import gestore_libreria.db.*;
 import gestore_libreria.model.Book;
 import gestore_libreria.observer.ConcreteBookObserver;
 
+/**
+ * Classe principale dell'interfaccia grafica per la gestione della libreria.
+ * Estende {@link JFrame}.
+ * Integra e concretizza le operazioni possibili con la libreria, visualizzazione, modifica, aggiunta, rimozione e gestione
+ * dello stato dei libri.
+ * Include anche undo/redo e import/export del database
+ */
+
 public class GestoreLibreriaUI extends JFrame{
 
     private ConcreteBookManager db;
@@ -27,12 +35,22 @@ public class GestoreLibreriaUI extends JFrame{
     private JMenuItem undo;
     private JMenuItem redo;
 
+    /**
+     * Costruttore
+     *
+     * @param db Istanza di {@link ConcreteBookManager} per la gestione dei dati dei libri
+     * @pre {@code db} deve essere instanziato correttamente
+     * @post l'interfaccia utente viene visualizzata
+     */
     public GestoreLibreriaUI(ConcreteBookManager db){
         super("Gestore Libreria");
         this.db = db;
         inizializzaUI();
     }
 
+    /**
+     * Inzializza l'interfaccia utente, configurando layout, meno pannelli e listener
+     */
     private void inizializzaUI() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1080, 720);
@@ -79,6 +97,13 @@ public class GestoreLibreriaUI extends JFrame{
 
     }
 
+    /**
+     * Mostra i dettagli di un libro selezionato, permette la modifica e l'eliminazione di un oggetto {@link Book}
+     * @pre {@code book} non deve essere null.
+     * @post Se modificato, il libro viene aggiornato nel database e l'interfaccia viene aggiornata.
+     * @post Se eliminato, il libro viene rimosso dal database e l'interfaccia viene aggiornata.
+     * @param book
+     */
     private void showBookDetails(Book book) {
         JTextField titoloField = new JTextField(book.getTitle(), 20);
         JTextField autoreField = new JTextField(book.getAuthor(), 20);
@@ -184,9 +209,23 @@ public class GestoreLibreriaUI extends JFrame{
                 JOptionPane.showMessageDialog(this, "Libro eliminato con successo!", "Successo", JOptionPane.INFORMATION_MESSAGE);
             }
         }
-        //JOptionPane.showConfirmDialog(this, BookPanel, "Dettagli Libro", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
+    /**
+     * Utilizzato in {@code showBookDetails()} imposta la modificabilità dei campi dei dettagli del libro.
+     *
+     * @param editable True per rendere i campi modificabili, false per renderli non modificabili.
+     * @param titoloField Campo del titolo.
+     * @param autoreField Campo dell'autore.
+     * @param isbnField Campo dell'ISBN.
+     * @param genreField Campo del genere.
+     * @param ratingSpinner Spinner del rating.
+     * @param statoCombo ComboBox dello stato di lettura.
+     * @param browseBtn Pulsante per la selezione dell'immagine.
+     * @param imagePathField Campo del percorso dell'immagine.
+     * @pre Tutti i parametri devono essere inizializzati.
+     * @post I campi sono impostati come modificabili o non modificabili in base al parametro {@code editable}.
+     */
     private void setFieldsEditable(boolean editable, JTextField titoloField, JTextField autoreField, JTextField isbnField, JTextField genreField, JSpinner ratingSpinner,
                                    JComboBox<String> statoCombo, JButton browseBtn, JTextField imagePathField) {
         titoloField.setEditable(editable);
@@ -204,6 +243,13 @@ public class GestoreLibreriaUI extends JFrame{
         }
     }
 
+    /**
+     * Gestisce l'azione di eliminazione di un libro tramite un menu contestuale.
+     *
+     * @param book Il libro da eliminare.
+     * @pre {@code book} non deve essere null.
+     * @post Se confermato, il libro viene rimosso dal database e l'interfaccia viene aggiornata.
+     */
     private void PopupMenuAction(Book book) {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Sei sicuro di voler eliminare il libro '" + book.getTitle() + "'?",
@@ -220,6 +266,12 @@ public class GestoreLibreriaUI extends JFrame{
         }
     }
 
+    /**
+     * Crea la barra dei menu dell'applicazione, includendo le voci per file e modifica.
+     *
+     * @return La barra dei menu configurata.
+     * @post La barra dei menu contiene le voci per esportare/importare il database, uscire, e le operazioni di undo/redo.
+     */
     private JMenuBar creaMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
@@ -264,6 +316,11 @@ public class GestoreLibreriaUI extends JFrame{
         return menuBar;
     }
 
+    /**
+     * Aggiorna lo stato abilitato/disabilitato delle voci di menu undo e redo in base alla possibilità di eseguire tali operazioni.
+     *
+     * @post Le voci di menu undo e redo sono abilitate solo se le rispettive operazioni sono disponibili.
+     */
     public void updateUndoRedoMenuState() {
         if (db != null && db.getHistoryManager() != null) {
             undo.setEnabled(db.getHistoryManager().canUndo());

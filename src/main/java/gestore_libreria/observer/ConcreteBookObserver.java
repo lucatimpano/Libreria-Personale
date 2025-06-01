@@ -23,7 +23,7 @@ public class ConcreteBookObserver implements BookObserver{
     private ConcreteBookManager db;
 
     /**
-     * Costruisce una nuova istanza di ConcreteBookObserver.
+     * Costruisce una nuova istanza di ConcreteBookObserver e richiama il metodo {@code update()}.
      *
      * @param gestoreLibreriaUI l'interfaccia utente principale dove vengono visualizzati i criteri di ricerca e il {@code bookPanel}
      * @param bookPanel Il pannello dell'interfaccia utente che questo osservatore deve aggiornare.
@@ -44,7 +44,7 @@ public class ConcreteBookObserver implements BookObserver{
     /**
      * Aggiorna la vista dell'interfaccia utente recuperando tutti i libri dal database
      * e visualizzandoli, quindi aggiorna lo stato dei menu Undo/Redo.
-     * Questo metodo è tipicamente invocato quando l'oggetto osservabile (es. il manager dei libri)
+     * Questo metodo viene invocato quando l'oggetto osservabile (es. BookManager)
      * notifica un cambiamento.
      *
      * @pre Il manager dei libri (db) e il pannello dei libri (bookPanel) devono essere stati inizializzati correttamente.
@@ -62,7 +62,8 @@ public class ConcreteBookObserver implements BookObserver{
     }
 
     /**
-     * Rimuove questo osservatore dalla lista degli osservatori dell'oggetto osservabile (db).
+     * Rimuove questo osservatore dalla lista degli osservatori dell'oggetto osservabile (db). Attualmente eseguito
+     * alla chiusura del programma
      *
      * @pre L'oggetto osservabile (db) non deve essere null.
      * @pre Questo osservatore deve essere precedentemente stato "sottoscritto" (attached) al db.

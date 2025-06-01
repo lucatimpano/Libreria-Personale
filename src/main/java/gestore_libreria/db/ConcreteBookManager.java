@@ -23,7 +23,6 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @post Il repository interno è stato impostato con l'istanza fornita.
      * @post Viene creata una nuova istanza di BookHistoryManager.
      * @post L'istanza corrente di ConcreteBookManager è registrata come listener per il ripristino dei memento nella cronologia.
-     * @throws IllegalArgumentException se il parametro 'repository' è null.
      */
     public ConcreteBookManager(BookRepositoryImplementor repository) {
         this.repository = repository;
@@ -93,7 +92,6 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @post restituisce una lista non null di oggetti Book che corrispondono al criterio di ricerca
      * @post Se nessun libro rispetto il criterio viene restituita una lista vuota
      * @return Una {@code List<Book>} contenente i libri trovati
-     * @throws IllegalArgumentException se rating non è compreso tra 1 e 5.
      */
     @Override
     public List<Book> filterBookByRating(int rating) {
@@ -109,7 +107,6 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @post restituisce una lista non null di oggetti Book che hanno lo stato di lettura specificato
      * @post Se nessun libro rispetto il criterio viene restituita una lista vuota
      * @return Una {@code List<Book>} contenente i libri con lo stato di lettura specificato.
-     * @throws IllegalArgumentException se readingState non è uno stato valido.
      */
     @Override
     public List<Book> filterBookByReadingState(String readingState) {
@@ -143,7 +140,6 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @post Lo stato del libro nel database è aggiornato con i dati di {@code newBook}.
      * @post Un memento di tipo UPDATE è salvato nella cronologia, contenente sia {@code newBook} che {@code oldBook}.
      * @post Tutti gli osservatori sono notificati del cambiamento.
-     * @throws IllegalArgumentException se {@code oldBook} o {@code newBook} sono null, o se {@code newBook} non ha un ID valido/campi obbligatori.
      *
      */
     @Override
@@ -162,7 +158,6 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @post Il libro è rimosso dal database.
      * @post Un memento di tipo REMOVE è salvato nella cronologia, contenente lo stato del libro prima della rimozione.
      * @post Tutti gli osservatori sono notificati del cambiamento.
-     * @throws IllegalArgumentException se book è null o non ha un ID valido.
      */
     @Override
     public void deleteBook(Book book) {
@@ -188,7 +183,6 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
  * @post Se l'operazione è un UNDO di UPDATE, il libro viene ripristinato allo stato precedente.
  * @post Se l'operazione è un REDO di UPDATE, il libro viene ripristinato allo stato successivo.
  * @post Tutti gli osservatori sono notificati del cambiamento dopo il ripristino.
- * @throws IllegalArgumentException se il memento o il suo contenuto non sono validi per l'operazione specificata.
  */
     @Override
     public void restore(BookMemento memento, BookHistoryManager.ActionDirection direction) {
