@@ -20,11 +20,15 @@ public class BooksPanelUI extends JPanel {
     private static final Color UNREAD_STATE_COLOR = new Color(90, 93, 95);
     private static final Color READ_STATE_COLOR = new Color(112, 224, 0);
 
+    private GestoreLibreriaUI gestoreLibreriaUI;
+
     private JPopupMenu popupMenu;
 
-    public BooksPanelUI() {
+    public BooksPanelUI(GestoreLibreriaUI gestoreLibreriaUI) {
         setLayout(new BorderLayout());
         //setBorder(BorderFactory.createTitledBorder("Lista Libri"));
+
+        this.gestoreLibreriaUI = gestoreLibreriaUI;
 
         bookListPanel = new JPanel();
         bookListPanel.setLayout(new BoxLayout(bookListPanel, BoxLayout.Y_AXIS));
@@ -84,10 +88,31 @@ public class BooksPanelUI extends JPanel {
     public void displayBooks(List<Book> books) {
         bookListPanel.removeAll();
         if (books.isEmpty()) {
-            JLabel noBooksLabel = new JLabel("Nessun libro presente nella libreria.");
-            noBooksLabel.setForeground(Color.WHITE);
-            noBooksLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            bookListPanel.add(noBooksLabel);
+            JPanel emptyPanel = new JPanel(new GridBagLayout());
+            emptyPanel.setOpaque(false); // Trasparente per mantenere lo sfondo
+
+            JLabel emptyLabel = new JLabel();
+
+            // Carica l'immagine per la libreria vuota
+            ImageIcon emptyIcon = GestoreLibreriaUI.loadAndScaleImage("/images/empty_library.png", 200, 200);
+
+            if (emptyIcon != null) {
+                emptyLabel.setIcon(emptyIcon);
+            } else {
+                // Fallback al testo se l'immagine non è disponibile
+                emptyLabel.setText("Nessun libro presente nella libreria.");
+                emptyLabel.setForeground(Color.WHITE);
+                emptyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            }
+
+            // Centra l'etichetta nel pannello
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.anchor = GridBagConstraints.CENTER;
+
+            emptyPanel.add(emptyLabel, gbc);
+            bookListPanel.add(emptyPanel);
         } else {
             for (Book book : books) {
                 JPanel bookPanel = new JPanel(new BorderLayout());
@@ -146,26 +171,23 @@ public class BooksPanelUI extends JPanel {
                 coverLabel.setBackground(Color.LIGHT_GRAY); // Colore di sfondo per l'area della copertina
 
                 //caricamento immagine
-                try {
-                    ImageIcon icon = new ImageIcon(book.getCoverPath());
-                    // Verifica se l'immagine è stata caricata correttamente (larghezza > -1)
-                    if (icon.getIconWidth() == -1) {
-                        System.err.println("Impossibile caricare l'immagine da: " + book.getCoverPath() + ". File non valido o corrotto.");
-                        coverLabel.setText("Err Img"); // Testo placeholder se l'immagine non è valida
-                        coverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                        coverLabel.setForeground(Color.RED); // Per evidenziare l'errore
-                        coverLabel.setBackground(Color.DARK_GRAY); // Sfondo per il testo di errore
+                ImageIcon coverIcon = GestoreLibreriaUI.loadAndScaleImage(book.getCoverPath(), 70, 100);
+
+                if (coverIcon != null) {
+                    coverLabel.setIcon(coverIcon);
+                    coverLabel.setBackground(null); // Rimuovi il background grigio se c'è un'immagine valida
+                } else {
+                    // Prova a caricare un'immagine placeholder
+                    ImageIcon placeholder = GestoreLibreriaUI.loadPlaceholderImage(70, 100);
+                    if (placeholder != null) {
+                        coverLabel.setIcon(placeholder);
                     } else {
-                        Image img = icon.getImage().getScaledInstance(70, 100, Image.SCALE_SMOOTH);
-                        coverLabel.setIcon(new ImageIcon(img));
-                        coverLabel.setBackground(null); // Rimuovi il background grigio se c'è un'immagine valida
+                        // Se non riesce a caricare nemmeno il placeholder, mostra testo
+                        coverLabel.setText("Err Img");
+                        coverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                        coverLabel.setForeground(Color.RED);
+                        coverLabel.setBackground(Color.DARK_GRAY);
                     }
-                } catch (Exception e) {
-                    System.err.println("Errore durante il caricamento immagine: " + book.getCoverPath() + " - " + e.getMessage());
-                    coverLabel.setText("Err Img"); // Testo placeholder in caso di errore
-                    coverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                    coverLabel.setForeground(Color.RED);
-                    coverLabel.setBackground(Color.DARK_GRAY);
                 }
                 bookPanel.add(coverLabel, BorderLayout.WEST);
                 buildSingleElement(book, bookPanel);

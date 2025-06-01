@@ -55,7 +55,7 @@ public class GestoreLibreriaUI extends JFrame{
         mainPanel.add(leftPanel, BorderLayout.WEST);
         mainPanel.add(rightPanel, BorderLayout.CENTER);
 
-        this.booksPanelUI = new BooksPanelUI();
+        this.booksPanelUI = new BooksPanelUI(this);
         rightPanel.add(booksPanelUI, BorderLayout.CENTER);
 
         booksPanelUI.setOnBookClickListener(this::showBookDetails);
@@ -103,8 +103,12 @@ public class GestoreLibreriaUI extends JFrame{
         if (selectedIcon != null) {
             imagePreview.setIcon(selectedIcon);
         } else {
-            ImageIcon placeholder = new ImageIcon("src/main/resources/images/image_placeholder.png");
-            imagePreview.setIcon(new ImageIcon(placeholder.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+            ImageIcon placeholder = loadPlaceholderImage(width, height);
+            if (placeholder != null) {
+                imagePreview.setIcon(placeholder);
+            }else {
+                imagePreview.setText("Immagine non disponibile");
+            }
         }
 
         JPanel imageWrapper = new JPanel();
@@ -520,8 +524,12 @@ public class GestoreLibreriaUI extends JFrame{
             int height = 180;
             imagePreview.setPreferredSize(new Dimension(width, height));
 
-            ImageIcon placeholder = new ImageIcon("images/image_placeholder.png");
-            imagePreview.setIcon(new ImageIcon(placeholder.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+            ImageIcon placeholder = loadPlaceholderImage(width, height);
+            if (placeholder != null) {
+                imagePreview.setIcon(placeholder);
+            } else {
+                imagePreview.setText("Immagine non disponibile");
+            }
 
 
             JPanel imageWrapper = new JPanel();
@@ -568,7 +576,7 @@ public class GestoreLibreriaUI extends JFrame{
                 String genre = genreField.getText().trim();
                 int rating = (Integer) ratingSpinner.getValue();
                 String stato = (String) statoCombo.getSelectedItem();
-                String path = "images/image_placeholder.png";
+                String path = "/images/image_placeholder.png";
                 if(!imagePathField.getText().trim().isEmpty()){
                     path = imagePathField.getText().trim();
                 }
@@ -590,6 +598,23 @@ public class GestoreLibreriaUI extends JFrame{
         return addBookBtn;
     }
 
+    public static ImageIcon loadPlaceholderImage(int width, int height) {
+        try {
+            java.io.InputStream imageStream = GestoreLibreriaUI.class.getResourceAsStream("/images/image_placeholder.png");
+            if (imageStream != null) {
+                ImageIcon icon = new ImageIcon(javax.imageio.ImageIO.read(imageStream));
+                Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaled);
+            } else {
+                System.err.println("Immagine placeholder non trovata nel JAR");
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("Errore nel caricamento dell'immagine placeholder: " + e.getMessage());
+            return null;
+        }
+    }
+
     private void browseButtonAction(JButton browseBtn, JTextField imagePathField, JLabel imagePreview, int width, int height){
         browseBtn.addActionListener(ev -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -608,13 +633,30 @@ public class GestoreLibreriaUI extends JFrame{
         });
     }
 
-    private ImageIcon loadAndScaleImage(String path, int width, int height) {
+    public static ImageIcon loadAndScaleImage(String path, int width, int height) {
         try {
-            ImageIcon icon = new ImageIcon(path);
-            Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
+            // Se è un percorso delle risorse, carica dal JAR
+            if (path != null && (path.startsWith("/images/") || path.equals("/images/image_placeholder.png"))) {
+                java.io.InputStream imageStream = GestoreLibreriaUI.class.getResourceAsStream(path);
+                if (imageStream != null) {
+                    ImageIcon icon = new ImageIcon(javax.imageio.ImageIO.read(imageStream));
+                    Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaled);
+                }
+            }
+
+            // Altrimenti, carica come file esterno
+            if (path != null && !path.isEmpty()) {
+                ImageIcon icon = new ImageIcon(path);
+                if (icon.getIconWidth() > 0) {
+                    Image scaled = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                    return new ImageIcon(scaled);
+                }
+            }
+
+            return null;
         } catch (Exception e) {
-            System.err.println("Errore nel caricamento immagine: " + e.getMessage());
+            System.err.println("Errore nel caricamento immagine da: " + path + ". " + e.getMessage());
             return null;
         }
     }
