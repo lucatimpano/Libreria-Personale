@@ -2,7 +2,7 @@ package gestore_libreria.db;
 
 import java.sql.*;
 
-public class DatabaseConnectionSingleton {
+public final class DatabaseConnectionSingleton {
 
     //Riutilizzo la stessa connessione al database, ed evito di aprire una connessione per ogni query che eseguo
 

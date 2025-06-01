@@ -124,7 +124,47 @@ public class BookManagerTest {
         assertTrue(allBooks.get(0).getId() > 0);
     }
 
+    @Test
+    public void testDeleteBook() throws SQLException{
+        manager.addBook(testBook1);
 
+        List<Book> allBooks = manager.getAllBook();
+        manager.deleteBook(allBooks.get(0));
+        List<Book> remainingBooks = manager.getAllBook();
 
+        assertEquals(0, remainingBooks.size());
+    }
 
+    @Test
+    public void testFindByTitle() throws SQLException{
+        manager.addBook(testBook1);
+
+        List<Book> allBooks = manager.getAllBook();
+        List<Book> findBook = manager.findBookByTitle("Il Signore degli Anelli");
+        assertEquals(allBooks.get(0).getTitle(), findBook.get(0).getTitle());
+    }
+
+    @Test
+    public void testFindByAuthor() throws SQLException{
+        manager.addBook(testBook1);
+        List<Book> allBooks = manager.getAllBook();
+        List<Book> findBook = manager.findBookByAuthor("J.R.R. Tolkien");
+        assertEquals(allBooks.get(0).getAuthor(), findBook.get(0).getAuthor());
+    }
+
+    @Test
+    public void testFilterByRating() throws SQLException{
+        manager.addBook(testBook1);
+        List<Book> allBooks = manager.getAllBook();
+        List<Book> filteredBook = manager.filterBookByRating(5);
+        assertEquals(allBooks.get(0).getRating(), filteredBook.get(0).getRating());
+    }
+
+    @Test
+    public void testFilterByReadingState() throws SQLException{
+        manager.addBook(testBook1);
+        List<Book> allBooks = manager.getAllBook();
+        List<Book> filteredBook = manager.filterBookByReadingState("LETTO");
+        assertEquals(allBooks.get(0).getReadingState(), filteredBook.get(0).getReadingState());
+    }
 }
