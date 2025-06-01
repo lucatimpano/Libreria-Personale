@@ -9,9 +9,13 @@ import java.util.List;
 //classe che implementa il database
 public class SQLiteBookRepository implements BookRepositoryImplementor {
 
+    protected Connection getConnection() throws SQLException {
+        return DatabaseConnectionSingleton.getInstance();
+    }
+
     public SQLiteBookRepository(){
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             Statement statement = connection.createStatement();
             //aggiungo un id come chiave del libro
             String createTable = """
@@ -41,7 +45,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
                 VALUES (?,?,?,?,?,?,?)
                 """;
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, book.getTitle());
             preparedStatement.setString(2,book.getAuthor());
@@ -74,7 +78,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         String sql = "SELECT * FROM books";
 
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
@@ -101,7 +105,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM books WHERE LOWER(title) LIKE LOWER(?)";
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, "%" + title + "%");
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -127,7 +131,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM books WHERE rating = ?";
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,rating);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -153,7 +157,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM books WHERE LOWER(readingState) LIKE LOWER(?)";
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, "%" + readingState + "%");
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -179,7 +183,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?)";
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, "%" + author + "%");
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -205,7 +209,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         int id = book.getId();
         String sql = "Delete FROM books WHERE id = ?";
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
             int deleteRow = preparedStatement.executeUpdate();
@@ -235,7 +239,7 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
                 WHERE id=?
                 """;
         try{
-            Connection connection = DatabaseConnectionSingleton.getInstance();
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, book.getTitle());
             preparedStatement.setString(2, book.getAuthor());
