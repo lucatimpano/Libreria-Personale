@@ -3,6 +3,7 @@ package gestore_libreria.memento;
 import gestore_libreria.model.Book;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +16,7 @@ public class BookHistoryManagerTest {
     private BookMemento testBookMemento2;
 
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         bookHistoryManager = new BookHistoryManager();
         testBook1 = new Book.Builder("Il Signore degli Anelli", "J.R.R. Tolkien")

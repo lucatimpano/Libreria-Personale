@@ -3,6 +3,7 @@ package gestore_libreria.memento;
 import gestore_libreria.model.Book;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.*;
 
@@ -14,7 +15,7 @@ public class BookMementoTest {
     private BookMemento memento2;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         testBook1 = new Book.Builder("Il Signore degli Anelli", "J.R.R. Tolkien")
                 .isbn("978-0544003415")

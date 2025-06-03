@@ -550,7 +550,6 @@ public class GestoreLibreriaUI extends JFrame{
 
     }
 
-
     private void highlightButton(JButton selectedButton, List<JButton> buttons, Color selectedColor, Color defaultColor) {
         for (JButton btn : buttons) {
             btn.setBackground(defaultColor);
