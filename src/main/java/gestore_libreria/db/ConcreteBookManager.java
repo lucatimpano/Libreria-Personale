@@ -3,6 +3,7 @@ package gestore_libreria.db;
 import gestore_libreria.memento.BookHistoryManager;
 import gestore_libreria.memento.BookMemento;
 import gestore_libreria.model.Book;
+import gestore_libreria.model.SortCriteria;
 import gestore_libreria.observer.BookObserver;
 import gestore_libreria.observer.Subject;
 
@@ -66,8 +67,8 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @return Una {@code List<Book>} contenente i libri contenuti nel database.
      */
     @Override
-    public List<Book> getAllBook() {
-        return repository.loadAll();
+    public List<Book> getAllBook(SortCriteria criteria) {
+        return repository.loadAll(criteria);
     }
 
     /**
@@ -80,8 +81,8 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @return Una {@code List<Book>} contenente i libri trovati.
      */
     @Override
-    public List<Book> findBookByTitle(String title) {
-        return repository.findByTitle(title);
+    public List<Book> findBookByTitle(String title, SortCriteria criteria) {
+        return repository.findByTitle(title, criteria);
     }
 
     /**
@@ -94,8 +95,8 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @return Una {@code List<Book>} contenente i libri trovati
      */
     @Override
-    public List<Book> filterBookByRating(int rating) {
-        return repository.findByRating(rating);
+    public List<Book> filterBookByRating(int rating, SortCriteria criteria) {
+        return repository.findByRating(rating, criteria);
     }
 
     /**
@@ -109,8 +110,8 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @return Una {@code List<Book>} contenente i libri con lo stato di lettura specificato.
      */
     @Override
-    public List<Book> filterBookByReadingState(String readingState) {
-        return repository.findByReadingState(readingState);
+    public List<Book> filterBookByReadingState(String readingState, SortCriteria criteria) {
+        return repository.findByReadingState(readingState, criteria);
     }
 
     /**
@@ -123,8 +124,8 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @return Una {@code List<Book>} contenente i libri trovati.
      */
     @Override
-    public List<Book> findBookByAuthor(String author) {
-        return repository.findByAuthor(author);
+    public List<Book> findBookByAuthor(String author, SortCriteria criteria) {
+        return repository.findByAuthor(author, criteria);
     }
 
     /**

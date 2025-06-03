@@ -56,7 +56,7 @@ public class ConcreteBookObserver implements BookObserver{
     @Override
     public void update() {
         System.out.println("Aggiorno la bookView");
-        List<Book> books = db.getAllBook();
+        List<Book> books = db.getAllBook(gestoreLibreriaUI.getCurrentSortCriteria());
         bookPanel.displayBooks(books);
         gestoreLibreriaUI.updateUndoRedoMenuState();
     }

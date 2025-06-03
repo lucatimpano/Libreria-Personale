@@ -16,6 +16,7 @@ import java.util.List;
 import com.formdev.flatlaf.themes.*;
 import gestore_libreria.db.*;
 import gestore_libreria.model.Book;
+import gestore_libreria.model.SortCriteria;
 import gestore_libreria.observer.ConcreteBookObserver;
 
 /**
@@ -34,6 +35,8 @@ public class GestoreLibreriaUI extends JFrame{
 
     private JMenuItem undo;
     private JMenuItem redo;
+
+    private SortCriteria currentSortCriteria = SortCriteria.NONE; // Default
 
     /**
      * Costruttore
@@ -280,6 +283,7 @@ public class GestoreLibreriaUI extends JFrame{
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenu editMenu = new JMenu("Edit");
+        JMenu viewMenu = new JMenu("View");
 
         //sezione file
 
@@ -297,15 +301,60 @@ public class GestoreLibreriaUI extends JFrame{
         });
 
         //sezione edit
-        undo = new JMenuItem("Undo");
+        undo = new JMenuItem("⮨Undo");
         undo.addActionListener(e -> {
             db.getHistoryManager().undo();
         });
 
-        redo = new JMenuItem("Redo");
+        redo = new JMenuItem("➥Redo");
         redo.addActionListener(e -> {
             db.getHistoryManager().redo();
         });
+
+        //sezione view
+        JMenuItem sortByTitleAsc = new JMenuItem("Ordina per Titolo (A-Z)");
+        sortByTitleAsc.addActionListener(e -> {
+            this.currentSortCriteria = SortCriteria.TITLE_ASC;
+            refreshBookListView();
+        });
+        viewMenu.add(sortByTitleAsc);
+
+        JMenuItem sortByTitleDesc = new JMenuItem("Ordina per Titolo (Z-A)");
+        sortByTitleDesc.addActionListener(e -> {
+            this.currentSortCriteria = SortCriteria.TITLE_DESC;
+            refreshBookListView();
+        });
+        viewMenu.add(sortByTitleDesc);
+
+        JMenuItem sortByAuthorAsc = new JMenuItem("Ordina per Autore (A-Z)");
+        sortByAuthorAsc.addActionListener(e -> {
+            this.currentSortCriteria = SortCriteria.AUTHOR_ASC;
+            refreshBookListView();
+        });
+        viewMenu.add(sortByAuthorAsc);
+
+        JMenuItem sortByAuthorDesc = new JMenuItem("Ordina per Autore (Z-A)");
+        sortByAuthorAsc.addActionListener(e -> {
+            this.currentSortCriteria = SortCriteria.AUTHOR_DESC;
+            refreshBookListView();
+        });
+        viewMenu.add(sortByAuthorDesc);
+
+        JMenuItem sortByRatingAsc = new JMenuItem("⮬Ordina per Rating (Crescente)");
+        sortByRatingAsc.addActionListener(e -> {
+            this.currentSortCriteria = SortCriteria.RATING_ASC;
+            refreshBookListView();
+        });
+        viewMenu.add(sortByRatingAsc);
+
+        JMenuItem sortByRatingDesc = new JMenuItem("⮮Ordina per Rating (Decrescente)");
+        sortByRatingDesc.addActionListener(e -> {
+            this.currentSortCriteria = SortCriteria.RATING_DESC;
+            refreshBookListView();
+        });
+        viewMenu.add(sortByRatingDesc);
+
+
 
         fileMenu.add(exportDB);
         fileMenu.add(importDB);
@@ -317,7 +366,18 @@ public class GestoreLibreriaUI extends JFrame{
 
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
+        menuBar.add(viewMenu);
         return menuBar;
+    }
+
+    public SortCriteria getCurrentSortCriteria() {
+        return currentSortCriteria;
+    }
+
+    private void refreshBookListView(){
+        if (db != null){
+            db.notifyObservers();
+        }
     }
 
     /**
@@ -353,7 +413,7 @@ public class GestoreLibreriaUI extends JFrame{
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
-                booksPanelUI.displayBooks(db.getAllBook());
+                booksPanelUI.displayBooks(db.getAllBook(this.currentSortCriteria));
             }
         }
     }
@@ -382,7 +442,7 @@ public class GestoreLibreriaUI extends JFrame{
                     bookObserver.unsubscribe();
                     bookObserver = new ConcreteBookObserver(this,this.booksPanelUI,this.db);
 
-                    booksPanelUI.displayBooks(db.getAllBook());
+                    booksPanelUI.displayBooks(db.getAllBook(this.currentSortCriteria));
                 }catch (IOException | SQLException e){
                     JOptionPane.showMessageDialog(this, "Errore durante l'importazione del database: " + e.getMessage(), "Errore Importazione", JOptionPane.ERROR_MESSAGE);
                 }
@@ -422,17 +482,17 @@ public class GestoreLibreriaUI extends JFrame{
             String criterion = searchCriteriaCombo.getSelectedItem().toString();
             if(criterion.equals("Titolo")){
                 if (!searchText.isEmpty() && !searchText.equals("Search")) {
-                    List<Book> searchResults = db.findBookByTitle(searchText);
+                    List<Book> searchResults = db.findBookByTitle(searchText, this.currentSortCriteria);
                     booksPanelUI.displayBooks(searchResults);
                 } else {
-                    booksPanelUI.displayBooks(db.getAllBook());
+                    booksPanelUI.displayBooks(db.getAllBook(this.currentSortCriteria));
                 }
             }else {
                 if (!searchText.isEmpty() && !searchText.equals("Search")) {
-                    List<Book> searchResults = db.findBookByAuthor(searchText);
+                    List<Book> searchResults = db.findBookByAuthor(searchText, this.currentSortCriteria);
                     booksPanelUI.displayBooks(searchResults);
                 } else {
-                    booksPanelUI.displayBooks(db.getAllBook());
+                    booksPanelUI.displayBooks(db.getAllBook(this.currentSortCriteria));
                 }
             }
         });
@@ -486,22 +546,22 @@ public class GestoreLibreriaUI extends JFrame{
         }
 
         AllBtn.addActionListener(e -> {
-            booksPanelUI.displayBooks(db.getAllBook()); // Mostra tutti i libri
+            booksPanelUI.displayBooks(db.getAllBook(this.currentSortCriteria)); // Mostra tutti i libri
             highlightButton(AllBtn, stateButtons, selectedColor, defaultColor); // Evidenzia il bottone
         });
 
         lettiBtn.addActionListener(e -> {
-            booksPanelUI.displayBooks(db.filterBookByReadingState("LETTO")); // Filtra per "LETTO"
+            booksPanelUI.displayBooks(db.filterBookByReadingState("LETTO", this.currentSortCriteria)); // Filtra per "LETTO"
             highlightButton(lettiBtn, stateButtons, selectedColor, defaultColor);
         });
 
         inLetturaBtn.addActionListener(e -> {
-            booksPanelUI.displayBooks(db.filterBookByReadingState("IN LETTURA")); // Filtra per "IN LETTURA"
+            booksPanelUI.displayBooks(db.filterBookByReadingState("IN LETTURA", this.currentSortCriteria)); // Filtra per "IN LETTURA"
             highlightButton(inLetturaBtn, stateButtons, selectedColor, defaultColor);
         });
 
         daLeggereBtn.addActionListener(e -> {
-            booksPanelUI.displayBooks(db.filterBookByReadingState("DA LEGGERE")); // Filtra per "DA LEGGERE"
+            booksPanelUI.displayBooks(db.filterBookByReadingState("DA LEGGERE", this.currentSortCriteria)); // Filtra per "DA LEGGERE"
             highlightButton(daLeggereBtn, stateButtons, selectedColor, defaultColor);
         });
 
@@ -526,7 +586,7 @@ public class GestoreLibreriaUI extends JFrame{
 
             final int currentRating = i; // Per l'uso nella lambda
             starButton.addActionListener(e -> {
-                booksPanelUI.displayBooks(db.filterBookByRating(currentRating));
+                booksPanelUI.displayBooks(db.filterBookByRating(currentRating, this.currentSortCriteria));
                 highlightButton(starButton, stateButtons, selectedColor, defaultColor); // Evidenzia la stella
             });
             ratingPanel.add(starButton);

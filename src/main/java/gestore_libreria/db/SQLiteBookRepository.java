@@ -1,6 +1,7 @@
 package gestore_libreria.db;
 
 import gestore_libreria.model.Book;
+import gestore_libreria.model.SortCriteria;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -72,10 +73,32 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
         }
     }
 
+    private String getOrderByCriteria(SortCriteria criteria){
+        if(criteria == null || criteria == SortCriteria.NONE){
+            return "";
+        }
+        switch (criteria){
+            case TITLE_ASC:
+                return " ORDER BY LOWER(title) ASC";
+            case TITLE_DESC:
+                return " ORDER BY LOWER(title) DESC";
+            case AUTHOR_ASC:
+                return " ORDER BY LOWER(author) ASC";
+            case AUTHOR_DESC:
+                return " ORDER BY LOWER(author) DESC";
+            case RATING_ASC:
+                return " ORDER BY rating ASC, LOWER(title) ASC";
+            case RATING_DESC:
+                return " ORDER BY rating DESC, LOWER(title) ASC";
+            default:
+                return "";
+        }
+    }
+
     @Override
-    public List<Book> loadAll() {
+    public List<Book> loadAll(SortCriteria criteria) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books";
+        String sql = "SELECT * FROM books" + getOrderByCriteria(criteria);
 
         try{
             Connection connection = getConnection();
@@ -101,9 +124,9 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
     }
 
     @Override
-    public List<Book> findByTitle(String title) {
+    public List<Book> findByTitle(String title, SortCriteria criteria) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books WHERE LOWER(title) LIKE LOWER(?)";
+        String sql = "SELECT * FROM books WHERE LOWER(title) LIKE LOWER(?)" + getOrderByCriteria(criteria);
         try{
             Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -121,15 +144,15 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
                 books.add(book);
             }
         } catch (SQLException e) {
-            System.err.println("Errore nella ricerca del libro dal titolo");
+            System.err.println("Errore nella ricerca del libro dal titolo" + e.getMessage());
         }
         return books;
     }
 
     @Override
-    public List<Book> findByRating(int rating) {
+    public List<Book> findByRating(int rating, SortCriteria criteria) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books WHERE rating = ?";
+        String sql = "SELECT * FROM books WHERE rating = ?" + getOrderByCriteria(criteria);
         try{
             Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -153,9 +176,9 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
     }
 
     @Override
-    public List<Book> findByReadingState(String readingState) {
+    public List<Book> findByReadingState(String readingState, SortCriteria criteria) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books WHERE LOWER(readingState) LIKE LOWER(?)";
+        String sql = "SELECT * FROM books WHERE LOWER(readingState) LIKE LOWER(?)" + getOrderByCriteria(criteria);
         try{
             Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -179,9 +202,9 @@ public class SQLiteBookRepository implements BookRepositoryImplementor {
     }
 
     @Override
-    public List<Book> findByAuthor(String author) {
+    public List<Book> findByAuthor(String author, SortCriteria criteria) {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?)";
+        String sql = "SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?)" + getOrderByCriteria(criteria);
         try{
             Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
