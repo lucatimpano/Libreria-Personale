@@ -274,10 +274,10 @@ public class GestoreLibreriaUI extends JFrame{
     }
 
     /**
-     * Crea la barra dei menu dell'applicazione, includendo le voci per file e modifica.
+     * Crea la barra dei menu dell'applicazione, includendo le voci per file, modifica e criterio di visualizzazione.
      *
      * @return La barra dei menu configurata.
-     * @post La barra dei menu contiene le voci per esportare/importare il database, uscire, e le operazioni di undo/redo.
+     * @post La barra dei menu contiene le voci per esportare/importare il database, uscire, le operazioni di undo/redo e le impostazioni di visualizzazione.
      */
     private JMenuBar creaMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -334,7 +334,7 @@ public class GestoreLibreriaUI extends JFrame{
         viewMenu.add(sortByAuthorAsc);
 
         JMenuItem sortByAuthorDesc = new JMenuItem("Ordina per Autore (Z-A)");
-        sortByAuthorAsc.addActionListener(e -> {
+        sortByAuthorDesc.addActionListener(e -> {
             this.currentSortCriteria = SortCriteria.AUTHOR_DESC;
             refreshBookListView();
         });
@@ -370,10 +370,19 @@ public class GestoreLibreriaUI extends JFrame{
         return menuBar;
     }
 
+    /**
+     * Ritorna il metodo di ordinamneto scelto dall'utente
+     * @return il criterio di ordinamento corrente
+     */
     public SortCriteria getCurrentSortCriteria() {
         return currentSortCriteria;
     }
 
+    /**
+     * metodo per aggiornare la listView quando viene cambiato il criterio di  ordinamento
+     * @pre {@code db != null}
+     * @post vengono notificati tutti gli observer
+     */
     private void refreshBookListView(){
         if (db != null){
             db.notifyObservers();
