@@ -16,7 +16,7 @@ public class BookHistoryManagerTest {
     private BookMemento testBookMemento2;
 
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         bookHistoryManager = new BookHistoryManager();
         testBook1 = new Book.Builder("Il Signore degli Anelli", "J.R.R. Tolkien")

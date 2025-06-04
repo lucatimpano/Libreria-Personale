@@ -30,7 +30,7 @@ public class SubjectTest {
         }
     }
 
-    @BeforeEach
+    @Before
     public void setUp() {
         subject = new ConcreteTestSubject();
         observer1 = new TestObserver();

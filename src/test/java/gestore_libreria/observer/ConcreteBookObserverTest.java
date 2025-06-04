@@ -2,6 +2,7 @@ package gestore_libreria.observer;
 
 import gestore_libreria.db.ConcreteBookManager;
 import gestore_libreria.model.Book;
+import gestore_libreria.model.SortCriteria;
 import gestore_libreria.ui.BooksPanelUI;
 import gestore_libreria.ui.GestoreLibreriaUI;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,7 @@ class ConcreteBookObserverTest {
         }
 
         @Override
-        public List<Book> getAllBook() {
+        public List<Book> getAllBook(SortCriteria criteria) {
             return new ArrayList<>(books);
         }
 

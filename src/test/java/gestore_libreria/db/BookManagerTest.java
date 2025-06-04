@@ -1,9 +1,11 @@
 package gestore_libreria.db;
 
 import gestore_libreria.model.Book;
+import gestore_libreria.model.SortCriteria;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -85,7 +87,7 @@ public class BookManagerTest {
     public void testAddBook() throws SQLException{
         manager.addBook(testBook1);
 
-        List<Book> allBooks = manager.getAllBook();
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
         assertEquals(1, allBooks.size());
         assertEquals("Il Signore degli Anelli", allBooks.get(0).getTitle());
         assertEquals("J.R.R. Tolkien", allBooks.get(0).getAuthor());
@@ -97,7 +99,7 @@ public class BookManagerTest {
         manager.addBook(testBook1);
         manager.addBook(testBook2);
 
-        List<Book> allBooks = manager.getAllBook();
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
         assertEquals(2, allBooks.size());
     }
 
@@ -105,7 +107,7 @@ public class BookManagerTest {
     public void testUpdateBook() throws SQLException{
         manager.addBook(testBook1);
 
-        List<Book> allBooks = manager.getAllBook();
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
         Book originalBook = allBooks.get(0);
 
         Book updatedBook = new Book.Builder("Il Signore degli Anelli - Update Test", "J.R.R. Tolkien")
@@ -117,7 +119,7 @@ public class BookManagerTest {
                 .build();
         manager.updateBook(originalBook, updatedBook);
 
-        List<Book> updatedBooks = manager.getAllBook();
+        List<Book> updatedBooks = manager.getAllBook(SortCriteria.NONE);
         assertEquals(1, updatedBooks.size());
         assertEquals("Il Signore degli Anelli - Update Test", updatedBooks.get(0).getTitle());
         assertEquals("J.R.R. Tolkien", updatedBooks.get(0).getAuthor());
@@ -128,9 +130,9 @@ public class BookManagerTest {
     public void testDeleteBook() throws SQLException{
         manager.addBook(testBook1);
 
-        List<Book> allBooks = manager.getAllBook();
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
         manager.deleteBook(allBooks.get(0));
-        List<Book> remainingBooks = manager.getAllBook();
+        List<Book> remainingBooks = manager.getAllBook(SortCriteria.NONE);
 
         assertEquals(0, remainingBooks.size());
     }
@@ -139,32 +141,32 @@ public class BookManagerTest {
     public void testFindByTitle() throws SQLException{
         manager.addBook(testBook1);
 
-        List<Book> allBooks = manager.getAllBook();
-        List<Book> findBook = manager.findBookByTitle("Il Signore degli Anelli");
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
+        List<Book> findBook = manager.findBookByTitle("Il Signore degli Anelli",SortCriteria.NONE);
         assertEquals(allBooks.get(0).getTitle(), findBook.get(0).getTitle());
     }
 
     @Test
     public void testFindByAuthor() throws SQLException{
         manager.addBook(testBook1);
-        List<Book> allBooks = manager.getAllBook();
-        List<Book> findBook = manager.findBookByAuthor("J.R.R. Tolkien");
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
+        List<Book> findBook = manager.findBookByAuthor("J.R.R. Tolkien",SortCriteria.NONE);
         assertEquals(allBooks.get(0).getAuthor(), findBook.get(0).getAuthor());
     }
 
     @Test
     public void testFilterByRating() throws SQLException{
         manager.addBook(testBook1);
-        List<Book> allBooks = manager.getAllBook();
-        List<Book> filteredBook = manager.filterBookByRating(5);
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
+        List<Book> filteredBook = manager.filterBookByRating(5,SortCriteria.NONE);
         assertEquals(allBooks.get(0).getRating(), filteredBook.get(0).getRating());
     }
 
     @Test
     public void testFilterByReadingState() throws SQLException{
         manager.addBook(testBook1);
-        List<Book> allBooks = manager.getAllBook();
-        List<Book> filteredBook = manager.filterBookByReadingState("LETTO");
+        List<Book> allBooks = manager.getAllBook(SortCriteria.NONE);
+        List<Book> filteredBook = manager.filterBookByReadingState("LETTO",SortCriteria.NONE);
         assertEquals(allBooks.get(0).getReadingState(), filteredBook.get(0).getReadingState());
     }
 }
