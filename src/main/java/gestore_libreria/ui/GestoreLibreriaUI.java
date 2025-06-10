@@ -319,12 +319,14 @@ public class GestoreLibreriaUI extends JFrame{
         });
         viewMenu.add(sortByTitleAsc);
 
+
         JMenuItem sortByTitleDesc = new JMenuItem("Ordina per Titolo (Z-A)");
         sortByTitleDesc.addActionListener(e -> {
             this.currentSortCriteria = SortCriteria.TITLE_DESC;
             refreshBookListView();
         });
         viewMenu.add(sortByTitleDesc);
+        viewMenu.addSeparator();
 
         JMenuItem sortByAuthorAsc = new JMenuItem("Ordina per Autore (A-Z)");
         sortByAuthorAsc.addActionListener(e -> {
@@ -339,6 +341,7 @@ public class GestoreLibreriaUI extends JFrame{
             refreshBookListView();
         });
         viewMenu.add(sortByAuthorDesc);
+        viewMenu.addSeparator();
 
         JMenuItem sortByRatingAsc = new JMenuItem("⮬Ordina per Rating (Crescente)");
         sortByRatingAsc.addActionListener(e -> {
