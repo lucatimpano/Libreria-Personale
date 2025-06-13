@@ -1,19 +1,18 @@
 package gestore_libreria.db;
 
-import gestore_libreria.memento.BookHistoryManager;
+import gestore_libreria.memento.BookHistoryCaretaker;
 import gestore_libreria.memento.BookMemento;
 import gestore_libreria.model.Book;
 import gestore_libreria.model.SortCriteria;
-import gestore_libreria.observer.BookObserver;
 import gestore_libreria.observer.Subject;
 
 import java.util.List;
 
 // Questa classe ora implementa l'interfaccia BookManager.
-public class ConcreteBookManager extends Subject implements BookManager, BookHistoryManager.OnMementoListener  {
+public class ConcreteBookManager extends Subject implements BookManager, BookHistoryCaretaker.OnMementoListener  {
 
     private final BookRepositoryImplementor repository;
-    private final BookHistoryManager historyManager;
+    private final BookHistoryCaretaker historyManager;
 
     /**
      * Costruisce una nuova istanza di ConcreteBookManager.
@@ -27,7 +26,7 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      */
     public ConcreteBookManager(BookRepositoryImplementor repository) {
         this.repository = repository;
-        this.historyManager = new BookHistoryManager();
+        this.historyManager = new BookHistoryCaretaker();
         this.historyManager.setOnMementoRestoreListener(this);
     }
 
@@ -38,7 +37,7 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
      * @post Restituisce un'istanza non null di BookHistoryManager.
      * @return L'istanza di {@code BookHistoryManager}.
      */
-    public BookHistoryManager getHistoryManager() {
+    public BookHistoryCaretaker getHistoryManager() {
         return historyManager;
     }
 
@@ -186,10 +185,10 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
  * @post Tutti gli osservatori sono notificati del cambiamento dopo il ripristino.
  */
     @Override
-    public void restore(BookMemento memento, BookHistoryManager.ActionDirection direction) {
+    public void restore(BookMemento memento, BookHistoryCaretaker.ActionDirection direction) {
         switch (memento.getOperationType()) {
             case ADD:
-                if (direction == BookHistoryManager.ActionDirection.UNDO) {
+                if (direction == BookHistoryCaretaker.ActionDirection.UNDO) {
                     repository.delete(memento.getBookState());
                     System.out.println("Undo ADD: Rimosso libro " + memento.getBookState().getTitle());
                 } else {
@@ -198,7 +197,7 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
                 }
                 break;
             case REMOVE:
-                if (direction == BookHistoryManager.ActionDirection.UNDO) {
+                if (direction == BookHistoryCaretaker.ActionDirection.UNDO) {
                     repository.save(memento.getBookState());
                     System.out.println("Undo DELETE: Riaggiunto libro " + memento.getBookState().getTitle());
                 } else {
@@ -207,7 +206,7 @@ public class ConcreteBookManager extends Subject implements BookManager, BookHis
                 }
                 break;
             case UPDATE:
-                if (direction == BookHistoryManager.ActionDirection.UNDO) {
+                if (direction == BookHistoryCaretaker.ActionDirection.UNDO) {
                     repository.update(memento.getPreviousBookState());
                     System.out.println("Undo UPDATE: Ripristinato libro " + memento.getPreviousBookState().getTitle() + " allo stato precedente.");
                 } else {

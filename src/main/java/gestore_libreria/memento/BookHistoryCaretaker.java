@@ -9,7 +9,7 @@ import java.util.Stack;
  * Permette le operazioni di undo/redo notificando gli observer registrati
  */
 
-public class BookHistoryManager {
+public class BookHistoryCaretaker {
 
     private final Stack<BookMemento> undoStack = new Stack<>();
     private final Stack<BookMemento> redoStack = new Stack<>();
