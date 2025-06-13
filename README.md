@@ -82,7 +82,6 @@ Il progetto non verrà mantenuto in futuro, ma sentiti libero di scaricare e mod
 ![Image](https://github.com/user-attachments/assets/f78677b6-4eda-4cbe-bbf9-09f8b30fc634)
 ![Image](https://github.com/user-attachments/assets/d1028149-508c-48a8-bef9-7761e559fee0)
 ![Image](https://github.com/user-attachments/assets/6e3449cf-ca60-4d23-ad72-fce3813a73db)
-![Image](https://github.com/user-attachments/assets/14b9004b-5fc0-49e9-bcda-3ecbf9be0670)
 ![Image](https://github.com/user-attachments/assets/1987f584-fe25-45c7-8868-bbd21c7dff06)
 ![Image](https://github.com/user-attachments/assets/10841303-354b-46bd-8cc7-f31a883c230b)
 ![Image](https://github.com/user-attachments/assets/bdb35db4-e047-46aa-9a79-04a4b13de858)
