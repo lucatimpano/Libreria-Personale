@@ -5,7 +5,7 @@ import gestore_libreria.model.SortCriteria;
 
 import java.util.List;
 
-// Questa è ora un'INTERFACCIA
+
 public interface BookManager {
 
     void addBook(Book book);
