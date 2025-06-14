@@ -1,11 +1,12 @@
 # Gestore Libreria
 
+
 [![Java](https://img.shields.io/badge/Java-11%2B-blue.svg?logo=openjdk)](https://www.java.com/)
 [![FlatLaf](https://img.shields.io/badge/UI-FlatLaf-orange.svg?logo=java)](https://www.formdev.com/flatlaf/)
 [![SQLite](https://img.shields.io/badge/Database-SQLite-green.svg?logo=sqlite)](https://www.sqlite.org/index.html)
 
 Gestore libreria è un'applicazione desktop per la gestione della propria libreria personale, sviluppata in Java Swing. Questo progetto è stato realizzato per esplorare e dimostrare l'implementazione pratica di diversi design pattern.
-
+<img src="https://github.com/user-attachments/assets/36f670ff-41b7-4519-aa5e-d1714385fb76" alt="Image" width="450"/>
 ## Funzionalità Principali
 
 * **Gestione Completa dei Libri:** Operazioni CRUD (Creazione, Lettura, Aggiornamento, Eliminazione) per la gestione dei libri.
