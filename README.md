@@ -55,7 +55,7 @@ Il codice è organizzato in pacchetti per favorire la modularità e la separazio
 java -jar Gestore_Libreria-1.0-SNAPSHOT.jar
 ```
 
-### Opzione 2 — Esegui il file `.jar` della release (consigliato)
+### Opzione 2 — Compila manualmente il progetto
 1. Clona il repository
 ```bash
 git clone https://github.com/lucatimpano/Libreria-Personale.git
