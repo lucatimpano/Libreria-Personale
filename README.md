@@ -9,6 +9,8 @@ Gestore libreria è un'applicazione desktop per la gestione della propria librer
 
 
 <img src="https://github.com/user-attachments/assets/36f670ff-41b7-4519-aa5e-d1714385fb76" alt="Image" width="450"/>
+
+
 ## Funzionalità Principali
 
 * **Gestione Completa dei Libri:** Operazioni CRUD (Creazione, Lettura, Aggiornamento, Eliminazione) per la gestione dei libri.
